@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מחולל מדבקות טקסט</title>
+<style>
+  :root {
+    --bg: #0e0e12; --surface: #1a1a22; --surface2: #22222e; --border: #2e2e3e;
+    --accent: #f0c060; --accent2: #7b6cf6; --text: #e8e8f0; --muted: #6a6a88; --radius: 12px;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    background:var(--bg); color:var(--text); font-family:Arial,sans-serif;
+    min-height:100vh; display:grid; grid-template-columns:355px 1fr; grid-template-rows:auto 1fr;
+  }
+  header {
+    grid-column:1/-1; background:var(--surface); border-bottom:1px solid var(--border);
+    padding:12px 20px; display:flex; align-items:center; gap:12px;
+  }
+  header .logo { width:32px;height:32px;background:var(--accent);border-radius:8px;display:grid;place-items:center;font-size:18px; }
+  header h1 { font-size:17px;font-weight:700; }
+  header h1 span { color:var(--accent); }
+  header .badge { margin-right:auto;font-size:11px;color:var(--muted);background:var(--surface2);border:1px solid var(--border);padding:3px 10px;border-radius:20px; }
+  aside {
+    background:var(--surface); border-left:1px solid var(--border);
+    padding:14px 13px; overflow-y:auto; display:flex; flex-direction:column; gap:14px;
+  }
+  .section-label { font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:5px; }
+  textarea#inputText {
+    width:100%;min-height:76px;background:var(--surface2);border:1px solid var(--border);
+    border-radius:var(--radius);color:var(--text);font-size:16px;padding:10px;resize:vertical;
+    font-family:Arial,sans-serif;line-height:1.5;transition:border-color .2s;
+  }
+  textarea#inputText:focus { outline:none;border-color:var(--accent2); }
+  .row { display:flex;gap:8px;align-items:center; }
+  .col { display:flex;flex-direction:column;gap:4px;flex:1; }
+  label.lbl { font-size:11px;color:var(--muted);font-weight:500; }
+  select {
+    background:var(--surface2);border:1px solid var(--border);color:var(--text);
+    border-radius:8px;padding:7px 10px;font-size:13px;width:100%;cursor:pointer;font-family:Arial,sans-serif;
+  }
+  select:focus { outline:none;border-color:var(--accent2); }
+  input[type=range] {
+    padding:0;height:6px;-webkit-appearance:none;border-radius:3px;
+    background:var(--border);cursor:pointer;width:100%;
+  }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer; }
+  input[type=color] { height:34px;padding:3px 6px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;width:100%; }
+  .range-val { font-size:11px;color:var(--accent);min-width:28px;text-align:left; }
+  .toggles { display:flex;gap:5px;flex-wrap:wrap; }
+  .toggle-btn {
+    background:var(--surface2);border:1px solid var(--border);color:var(--muted);
+    border-radius:8px;padding:5px 11px;font-size:12px;cursor:pointer;transition:all .15s;font-family:Arial,sans-serif;
+  }
+  .toggle-btn.active { background:var(--accent2);border-color:var(--accent2);color:#fff; }
+  .toggle-btn:hover { border-color:var(--accent2); }
+  .presets { display:grid;grid-template-columns:1fr 1fr;gap:6px; }
+  .preset-btn {
+    background:var(--surface2);border:1px solid var(--border);border-radius:10px;
+    padding:8px 6px;cursor:pointer;text-align:center;font-size:11px;color:var(--muted);
+    transition:all .15s;font-family:Arial,sans-serif;
+  }
+  .preset-btn:hover,.preset-btn.active { border-color:var(--accent);color:var(--accent);background:rgba(240,192,96,.08); }
+  .preset-icon { font-size:16px;display:block;margin-bottom:2px; }
+  .effect-row { background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:10px;display:flex;flex-direction:column;gap:8px; }
+  .effect-header { display:flex;align-items:center;justify-content:space-between;font-size:12px;font-weight:600; }
+  .switch { position:relative;display:inline-block;width:36px;height:20px; }
+  .switch input { opacity:0;width:0;height:0; }
+  .slider-sw { position:absolute;inset:0;background:var(--border);border-radius:20px;cursor:pointer;transition:.2s; }
+  .slider-sw::before { content:'';position:absolute;width:14px;height:14px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s; }
+  .switch input:checked + .slider-sw { background:var(--accent2); }
+  .switch input:checked + .slider-sw::before { transform:translateX(16px); }
+  .btn {
+    width:100%;padding:10px;border-radius:var(--radius);font-size:14px;font-weight:700;
+    cursor:pointer;border:none;font-family:Arial,sans-serif;transition:all .15s;
+  }
+  .btn-primary { background:var(--accent);color:#111; }
+  .btn-primary:hover { background:#f5d080;transform:translateY(-1px); }
+  .btn-secondary { background:var(--surface2);color:var(--text);border:1px solid var(--border); }
+  .btn-secondary:hover { border-color:var(--accent2); }
+  .anim-grid { display:grid;grid-template-columns:1fr 1fr;gap:5px; }
+  .anim-btn {
+    background:var(--surface2);border:1px solid var(--border);border-radius:10px;
+    padding:7px 5px;cursor:pointer;text-align:center;font-size:11px;color:var(--muted);
+    transition:all .15s;font-family:Arial,sans-serif;
+  }
+  .anim-btn:hover { border-color:var(--accent2);color:var(--accent2); }
+  .anim-btn.active { background:rgba(123,108,246,.2);border-color:var(--accent2);color:var(--accent2); }
+  .anim-icon { font-size:16px;display:block;margin-bottom:2px; }
+  main {
+    display:flex;flex-direction:column;align-items:center;padding:22px 18px;gap:14px;
+    background:var(--bg);overflow-y:auto;
+    background-image:radial-gradient(circle at 20% 20%,rgba(123,108,246,.06) 0%,transparent 60%),
+                     radial-gradient(circle at 80% 80%,rgba(240,192,96,.05) 0%,transparent 60%);
+  }
+  .canvas-wrapper { position:relative;border-radius:16px;overflow:hidden;border:1px solid var(--border);box-shadow:0 20px 60px rgba(0,0,0,.4); }
+  .canvas-bg {
+    position:absolute;inset:0;
+    background-image:linear-gradient(45deg,#2a2a36 25%,transparent 25%),linear-gradient(-45deg,#2a2a36 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#2a2a36 75%),linear-gradient(-45deg,transparent 75%,#2a2a36 75%);
+    background-size:20px 20px;background-position:0 0,0 10px,10px -10px,-10px 0;background-color:#222230;
+  }
+  canvas#preview { position:relative;display:block;max-width:660px;max-height:380px; }
+  #animPreview {
+    display:none;min-width:200px;min-height:80px;
+    align-items:center;justify-content:center;padding:20px;
+    position:relative;background:transparent;
+  }
+  .hint { font-size:12px;color:var(--muted);text-align:center; }
+  #fontStatus { font-size:11px;color:var(--accent2);margin-top:3px;min-height:14px; }
+  .compose-area { width:100%;max-width:680px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:14px; }
+  .compose-area h3 { font-size:11px;color:var(--muted);margin-bottom:8px;font-weight:700;letter-spacing:.08em;text-transform:uppercase; }
+  .drop-zone { border:2px dashed var(--border);border-radius:12px;padding:20px;text-align:center;cursor:pointer;transition:border-color .2s;color:var(--muted);font-size:13px; }
+  .drop-zone:hover { border-color:var(--accent2); }
+  .drop-zone input { display:none; }
+  #compositeCanvas { width:100%;border-radius:10px;display:none;margin-top:10px;border:1px solid var(--border); }
+  #composeControls { display:none;gap:8px;margin-top:8px;flex-wrap:wrap; }
+  #composeControls .btn { flex:1;min-width:100px; }
+  .pos-grid { display:none;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px; }
+  ::-webkit-scrollbar { width:6px; }
+  ::-webkit-scrollbar-track { background:transparent; }
+  ::-webkit-scrollbar-thumb { background:var(--border);border-radius:3px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">✦</div>
+  <h1>מחולל <span>מדבקות טקסט</span></h1>
+  <span class="badge">PNG שקוף • אנימציה • אמוג'י ✨</span>
+</header>
+
+<aside>
+  <div>
+    <div class="section-label">הטקסט שלך (אמוג'י נתמך 🎉)</div>
+    <textarea id="inputText">שלום עולם! 🌟</textarea>
+  </div>
+
+  <div>
+    <div class="section-label">פונט</div>
+    <select id="fontFamily">
+      <optgroup label="── עברית (Google Fonts) ──">
+        <option value="Heebo">Heebo — עגול מודרני</option>
+        <option value="Assistant">Assistant — נקי</option>
+        <option value="Frank Ruhl Libre">Frank Ruhl Libre — סריף קלאסי</option>
+        <option value="Rubik">Rubik — עגול חזק</option>
+        <option value="Secular One">Secular One — קצוות מרובעים</option>
+        <option value="Noto Sans Hebrew">Noto Sans Hebrew — טכני</option>
+        <option value="Alef">Alef — פשוט נקי</option>
+        <option value="Miriam Libre">Miriam Libre — בגרות</option>
+      </optgroup>
+      <optgroup label="── מערכת ──">
+        <option value="Arial">Arial</option>
+        <option value="Georgia">Georgia (סריף)</option>
+        <option value="Times New Roman">Times New Roman</option>
+        <option value="Courier New">Courier New</option>
+        <option value="Impact">Impact (כבד)</option>
+        <option value="Verdana">Verdana</option>
+        <option value="Tahoma">Tahoma</option>
+        <option value="Comic Sans MS">Comic Sans</option>
+      </optgroup>
+      <optgroup label="── פונט אישי ──">
+        <option value="__custom__">+ טען TTF/OTF מהמחשב…</option>
+      </optgroup>
+    </select>
+    <div id="fontStatus"></div>
+    <input type="file" id="customFontFile" accept=".ttf,.otf,.woff,.woff2" style="display:none">
+  </div>
+
+  <div>
+    <div class="section-label">גודל</div>
+    <div class="row" style="gap:6px">
+      <input type="range" id="fontSize" min="16" max="300" value="72">
+      <span class="range-val" id="fontSizeVal">72</span>
+    </div>
+    <div style="margin-top:7px">
+      <select id="fontWeight">
+        <option value="300">דק — 300</option>
+        <option value="400">רגיל — 400</option>
+        <option value="700" selected>מודגש — 700</option>
+        <option value="900">שחור — 900</option>
+      </select>
+    </div>
+  </div>
+
+  <div>
+    <div class="section-label">סגנון וכיוון</div>
+    <div class="toggles">
+      <button class="toggle-btn" id="tItalic">𝘐 נטוי</button>
+      <button class="toggle-btn" id="tUnder">U̲ קו</button>
+      <button class="toggle-btn" id="tUpper">AA</button>
+      <button class="toggle-btn active" id="tRtl">RTL ↵</button>
+    </div>
+  </div>
+
+  <div>
+    <div class="section-label">יישור</div>
+    <div class="toggles">
+      <button class="toggle-btn active" data-align="right">⬅ ימין</button>
+      <button class="toggle-btn" data-align="center">⬌ מרכז</button>
+      <button class="toggle-btn" data-align="left">➡ שמאל</button>
+    </div>
+  </div>
+
+  <div>
+    <div class="section-label">צבע ואטימות</div>
+    <div class="row">
+      <div class="col">
+        <label class="lbl">צבע</label>
+        <input type="color" id="textColor" value="#ffffff">
+      </div>
+      <div class="col">
+        <label class="lbl">אטימות <span class="range-val" id="opacityVal">100%</span></label>
+        <input type="range" id="textOpacity" min="10" max="100" value="100">
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="section-label">מרווח שורות <span class="range-val" id="lineHeightVal">1.3</span></div>
+    <input type="range" id="lineHeight" min="80" max="220" value="130">
+  </div>
+
+  <div class="effect-row">
+    <div class="effect-header">
+      <span>✏️ מסגרת (Stroke)</span>
+      <label class="switch"><input type="checkbox" id="strokeEnabled"><span class="slider-sw"></span></label>
+    </div>
+    <div id="strokeControls" style="display:none;flex-direction:column;gap:7px">
+      <div class="row">
+        <div class="col"><label class="lbl">צבע</label><input type="color" id="strokeColor" value="#000000"></div>
+        <div class="col">
+          <label class="lbl">עובי <span class="range-val" id="strokeWidthVal">4</span></label>
+          <input type="range" id="strokeWidth" min="1" max="30" value="4">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="effect-row">
+    <div class="effect-header">
+      <span>💫 צל / זוהר</span>
+      <label class="switch"><input type="checkbox" id="shadowEnabled"><span class="slider-sw"></span></label>
+    </div>
+    <div id="shadowControls" style="display:none;flex-direction:column;gap:7px">
+      <div class="row">
+        <div class="col"><label class="lbl">צבע</label><input type="color" id="shadowColor" value="#000000"></div>
+        <div class="col">
+          <label class="lbl">טשטוש <span class="range-val" id="shadowBlurVal">10</span></label>
+          <input type="range" id="shadowBlur" min="0" max="60" value="10">
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <label class="lbl">X <span class="range-val" id="shadowXVal">3</span></label>
+          <input type="range" id="shadowX" min="-30" max="30" value="3">
+        </div>
+        <div class="col">
+          <label class="lbl">Y <span class="range-val" id="shadowYVal">3</span></label>
+          <input type="range" id="shadowY" min="-30" max="30" value="3">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="section-label">פריסטים עיצוב מהיר</div>
+    <div class="presets">
+      <button class="preset-btn" onclick="applyPreset('neon')"><span class="preset-icon">🌟</span>ניאון</button>
+      <button class="preset-btn" onclick="applyPreset('shadow3d')"><span class="preset-icon">🎭</span>3D</button>
+      <button class="preset-btn" onclick="applyPreset('outline')"><span class="preset-icon">⬜</span>קונטור</button>
+      <button class="preset-btn" onclick="applyPreset('gold')"><span class="preset-icon">✨</span>זהב</button>
+      <button class="preset-btn" onclick="applyPreset('fire')"><span class="preset-icon">🔥</span>אש</button>
+      <button class="preset-btn" onclick="applyPreset('clean')"><span class="preset-icon">🌿</span>נקי</button>
+    </div>
+  </div>
+
+  <div>
+    <div class="section-label">ריפוד <span class="range-val" id="paddingVal">30</span>px</div>
+    <input type="range" id="padding" min="0" max="120" value="30">
+  </div>
+
+  <!-- ANIMATIONS -->
+  <div>
+    <div class="section-label">🎬 אנימציה (תצוגה מקדימה)</div>
+    <div class="anim-grid">
+      <button class="anim-btn active" data-anim="none"><span class="anim-icon">🚫</span>ללא</button>
+      <button class="anim-btn" data-anim="wave"><span class="anim-icon">🌊</span>גל אותיות</button>
+      <button class="anim-btn" data-anim="pop"><span class="anim-icon">💥</span>פופ קפיצה</button>
+      <button class="anim-btn" data-anim="zoom"><span class="anim-icon">🔍</span>זום פולס</button>
+      <button class="anim-btn" data-anim="slide"><span class="anim-icon">➡️</span>כניסה צד</button>
+      <button class="anim-btn" data-anim="rainbow"><span class="anim-icon">🌈</span>קשת צבעים</button>
+      <button class="anim-btn" data-anim="shake"><span class="anim-icon">📳</span>רטט</button>
+      <button class="anim-btn" data-anim="typewriter"><span class="anim-icon">⌨️</span>מכונת כתיבה</button>
+    </div>
+    <p style="font-size:10px;color:var(--muted);margin-top:6px;">האנימציה גלויה בתצוגה בלבד. ה-PNG המורד יהיה תמיד סטטי (שקוף).</p>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:7px">
+    <button class="btn btn-primary" onclick="downloadPNG()">⬇ הורד PNG שקוף (מדבקה)</button>
+    <button class="btn btn-secondary" onclick="copyToClipboard()">📋 העתק ללוח</button>
+  </div>
+</aside>
+
+<main>
+  <div class="canvas-wrapper" id="canvasWrapper">
+    <div class="canvas-bg"></div>
+    <canvas id="preview" width="600" height="200"></canvas>
+    <div id="animPreview"></div>
+  </div>
+  <p class="hint">הרקע המשובץ = שקיפות מלאה. ה-PNG מוכן להדבקה כמדבקה על כל תמונה.</p>
+
+  <div class="compose-area">
+    <h3>🖼 הדבק מדבקה על תמונה</h3>
+    <div class="drop-zone" onclick="document.getElementById('bgImageInput').click()">
+      <input type="file" id="bgImageInput" accept="image/*" onchange="loadBgImage(this)">
+      <div style="font-size:24px;margin-bottom:5px">🖼</div>
+      לחץ לבחירת תמונת רקע (JPG / PNG / WEBP)
+    </div>
+    <canvas id="compositeCanvas"></canvas>
+    <div class="pos-grid" id="posGrid">
+      <div><label class="lbl">מיקום X</label><input type="range" id="posX" min="0" max="100" value="50" oninput="compositeUpdate()"></div>
+      <div><label class="lbl">מיקום Y</label><input type="range" id="posY" min="0" max="100" value="50" oninput="compositeUpdate()"></div>
+      <div><label class="lbl">גודל %</label><input type="range" id="stickerScale" min="5" max="150" value="60" oninput="compositeUpdate()"></div>
+      <div><label class="lbl">סיבוב °</label><input type="range" id="stickerRotate" min="-180" max="180" value="0" oninput="compositeUpdate()"></div>
+    </div>
+    <div id="composeControls" style="display:none;gap:8px;margin-top:8px;flex-wrap:wrap">
+      <button class="btn btn-secondary" style="flex:1" onclick="document.getElementById('bgImageInput').click()">🔄 החלף</button>
+      <button class="btn btn-primary" style="flex:1" onclick="downloadComposite()">⬇ הורד תמונה</button>
+    </div>
+  </div>
+</main>
+
+<script>
+// ════════════════════════════════════════════
+//  GOOGLE FONTS — inject link + FontFace API
+// ════════════════════════════════════════════
+const GFONT_FAMILIES = [
+  'Heebo','Assistant','Frank+Ruhl+Libre','Rubik','Secular+One',
+  'Noto+Sans+Hebrew','Alef','Miriam+Libre'
+];
+
+// Inject <link> so CSS/DOM can use them
+(function() {
+  const weights = '300;400;700;900';
+  const families = GFONT_FAMILIES.map(f => `family=${f}:wght@${weights}`).join('&');
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = `https://fonts.googleapis.com/css2?${families}&display=swap`;
+  document.head.appendChild(link);
+})();
+
+// For Canvas, we must also load via FontFace API
+const loadedForCanvas = new Set(['Arial','Georgia','Times New Roman','Courier New','Impact','Verdana','Tahoma','Comic Sans MS']);
+
+async function ensureFontForCanvas(familyName) {
+  if (loadedForCanvas.has(familyName)) return;
+  const encoded = familyName.replace(/ /g,'+');
+  const weights = ['300','400','700','900'];
+  const fontStatus = document.getElementById('fontStatus');
+  fontStatus.textContent = `⏳ טוען ${familyName} לקנבס…`;
+  try {
+    // Use CSS @font-face URL via Google Fonts API CSS
+    const cssUrl = `https://fonts.googleapis.com/css2?family=${encoded}:wght@${weights.join(';')}&display=swap`;
+    // We parse the CSS to find woff2 URLs, but simpler: use the font via CSS already injected
+    // Trick: render invisible text to force browser to load the font, then copy to FontFace
+    await document.fonts.ready;
+    // Check if font is already available (CSS link loaded it)
+    const testStr = 'גאבcd';
+    for (const w of weights) {
+      if (document.fonts.check(`${w} 20px "${familyName}"`)) continue;
+      // Wait a bit for font to load
+      let tries = 0;
+      while (!document.fonts.check(`${w} 20px "${familyName}"`) && tries < 20) {
+        await new Promise(r => setTimeout(r, 150));
+        tries++;
+      }
+    }
+    loadedForCanvas.add(familyName);
+    fontStatus.textContent = `✓ ${familyName} מוכן`;
+    setTimeout(() => { fontStatus.textContent = ''; }, 1500);
+  } catch(e) {
+    document.getElementById('fontStatus').textContent = `⚠ ${familyName} — שגיאה`;
+  }
+}
+
+// ════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════
+const S = {
+  text:'שלום עולם! 🌟', font:'Heebo', size:72, weight:'700',
+  italic:false, underline:false, uppercase:false, rtl:true, align:'right',
+  color:'#ffffff', opacity:1, lineHeight:1.3,
+  stroke:false, strokeColor:'#000000', strokeWidth:4,
+  shadow:false, shadowColor:'#000000', shadowBlur:10, shadowX:3, shadowY:3,
+  padding:30, anim:'none',
+};
+
+const canvas = document.getElementById('preview');
+const ctx    = canvas.getContext('2d');
+let bgImage  = null;
+
+// ════════════════════════════════════════════
+//  CANVAS RENDER
+// ════════════════════════════════════════════
+function hexToRgba(hex, a) {
+  const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+function fontStr(size, weight, italic, family) {
+  return `${italic?'italic ':''}${weight} ${size}px "${family}", Heebo, Arial, sans-serif`;
+}
+
+function render() {
+  if (S.anim !== 'none') { renderAnim(); return; }
+  stopAnim();
+
+  let lines = S.text.split('\n');
+  if (S.uppercase) lines = lines.map(l => l.toUpperCase());
+
+  ctx.font = fontStr(S.size, S.weight, S.italic, S.font);
+  const lh  = S.size * S.lineHeight;
+  const pad = S.padding;
+  const sw  = S.stroke ? S.strokeWidth * 2 : 0;
+  const maxW = Math.max(10, ...lines.map(l => ctx.measureText(l).width));
+  const W = Math.ceil(maxW + pad*2 + sw*2);
+  const H = Math.ceil(lines.length * lh + pad*2 + sw*2);
+
+  canvas.width  = W;
+  canvas.height = H;
+  ctx.clearRect(0, 0, W, H);
+  ctx.font = fontStr(S.size, S.weight, S.italic, S.font);
+  ctx.direction   = S.rtl ? 'rtl' : 'ltr';
+  ctx.textBaseline= 'top';
+  ctx.textAlign   = S.align;
+
+  if (S.shadow) {
+    ctx.shadowColor   = S.shadowColor;
+    ctx.shadowBlur    = S.shadowBlur;
+    ctx.shadowOffsetX = S.shadowX;
+    ctx.shadowOffsetY = S.shadowY;
+  } else {
+    ctx.shadowColor   = 'transparent';
+    ctx.shadowBlur    = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+  }
+
+  const xBase = S.align==='right' ? W-pad-sw : S.align==='center' ? W/2 : pad+sw;
+
+  lines.forEach((line, i) => {
+    const y = pad + sw + i * lh;
+    if (S.stroke) {
+      ctx.strokeStyle = S.strokeColor;
+      ctx.lineWidth   = S.strokeWidth * 2;
+      ctx.lineJoin    = 'round';
+      ctx.strokeText(line, xBase, y);
+    }
+    ctx.fillStyle = hexToRgba(S.color, S.opacity);
+    ctx.fillText(line, xBase, y);
+
+    if (S.underline) {
+      const tw = ctx.measureText(line).width;
+      const uy = y + S.size + 3;
+      const ulx = S.align==='right' ? xBase-tw : S.align==='center' ? xBase-tw/2 : xBase;
+      const sc = ctx.shadowColor; ctx.shadowColor='transparent'; ctx.shadowBlur=0;
+      ctx.fillRect(ulx, uy, tw, Math.max(1, S.size*0.06));
+      ctx.shadowColor = sc; ctx.shadowBlur = S.shadow ? S.shadowBlur : 0;
+    }
+  });
+
+  if (bgImage) compositeUpdate();
+}
+
+// ════════════════════════════════════════════
+//  ANIMATIONS (CSS/HTML layer over canvas)
+// ════════════════════════════════════════════
+const ANIM_CSS = `
+<style>
+@keyframes wave-char { 0%,100%{transform:translateY(0) scale(1)} 50%{transform:translateY(-14px) scale(1.15)} }
+@keyframes pop-char  { 0%,100%{transform:scale(1)} 30%{transform:scale(1.5) rotate(-8deg)} 60%{transform:scale(0.85) rotate(4deg)} }
+@keyframes zoom-pulse{ 0%,100%{transform:scale(1)} 50%{transform:scale(1.1)} }
+@keyframes slide-in  { 0%{opacity:0;transform:translateX(-50px)} 70%{opacity:1;transform:translateX(4px)} 100%{transform:translateX(0)} }
+@keyframes shake-x   { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-7px)} 40%{transform:translateX(7px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
+@keyframes typewriter-char { 0%{opacity:0;transform:scale(.5)} 100%{opacity:1;transform:scale(1)} }
+.anim-char { display:inline-block; }
+</style>
+`;
+
+function charCss(anim, idx, total) {
+  const d = `${(idx * 0.07).toFixed(2)}s`;
+  switch(anim) {
+    case 'wave':       return `animation:wave-char 1.3s ease-in-out ${d} infinite`;
+    case 'pop':        return `animation:pop-char 1.6s ease ${d} infinite`;
+    case 'zoom':       return `animation:zoom-pulse 1.4s ease-in-out ${d} infinite`;
+    case 'slide':      return `animation:slide-in .7s cubic-bezier(.25,1,.5,1) ${d} both`;
+    case 'rainbow':    return `animation:zoom-pulse 2s ease-in-out ${d} infinite;color:hsl(${Math.round((idx/Math.max(total,1))*360)},100%,65%)`;
+    case 'shake':      return idx===0 ? `animation:shake-x .5s ease infinite` : '';
+    case 'typewriter': return `animation:typewriter-char .15s ease ${d} both;opacity:0;animation-fill-mode:forwards`;
+    default: return '';
+  }
+}
+
+function renderAnim() {
+  const ap  = document.getElementById('animPreview');
+  const cvs = document.getElementById('preview');
+  ap.style.display  = 'flex';
+  cvs.style.display = 'none';
+
+  let text = S.text;
+  if (S.uppercase) text = text.toUpperCase();
+  const fs  = Math.min(S.size, 110);
+  const fnt = fontStr(fs, S.weight, S.italic, S.font);
+  const shadowCSS = S.shadow ? `text-shadow:${S.shadowX}px ${S.shadowY}px ${S.shadowBlur}px ${S.shadowColor}` : '';
+  const strokeCSS = S.stroke ? `-webkit-text-stroke:${S.strokeWidth}px ${S.strokeColor}` : '';
+  const underCSS  = S.underline ? 'text-decoration:underline' : '';
+  const colorCSS  = S.anim==='rainbow' ? '' : `color:${S.color}`;
+  const alignCSS  = `text-align:${S.align==='right'?'right':S.align==='center'?'center':'left'}`;
+  const dirCSS    = `direction:${S.rtl?'rtl':'ltr'}`;
+
+  const allChars = [...text.replace(/\n/g,'')];
+  const total    = allChars.length;
+  let ci = 0;
+  let html = ANIM_CSS + `<div style="${alignCSS};${dirCSS}">`;
+
+  text.split('\n').forEach((line, li) => {
+    html += `<div style="font:${fnt};${shadowCSS};${strokeCSS};${underCSS};${colorCSS};line-height:${S.lineHeight};">`;
+    [...line].forEach(ch => {
+      const css = charCss(S.anim, ci++, total);
+      html += `<span class="anim-char" style="${css}">${ch===' '?'&nbsp;':ch.replace(/</g,'&lt;')}</span>`;
+    });
+    html += '</div>';
+  });
+  html += '</div>';
+
+  ap.innerHTML = html;
+  ap.style.minHeight = `${Math.min(fs*1.8, 300)}px`;
+
+  // Also draw static canvas so PNG download still works
+  renderStatic(text.split('\n'));
+}
+
+function renderStatic(lines) {
+  ctx.font = fontStr(S.size, S.weight, S.italic, S.font);
+  const lh=S.size*S.lineHeight, pad=S.padding, sw=S.stroke?S.strokeWidth*2:0;
+  const maxW = Math.max(10,...lines.map(l=>ctx.measureText(l).width));
+  canvas.width  = Math.ceil(maxW+pad*2+sw*2);
+  canvas.height = Math.ceil(lines.length*lh+pad*2+sw*2);
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.font=fontStr(S.size,S.weight,S.italic,S.font);
+  ctx.direction=S.rtl?'rtl':'ltr'; ctx.textBaseline='top'; ctx.textAlign=S.align;
+  if(S.shadow){ctx.shadowColor=S.shadowColor;ctx.shadowBlur=S.shadowBlur;ctx.shadowOffsetX=S.shadowX;ctx.shadowOffsetY=S.shadowY;}
+  const xBase=S.align==='right'?canvas.width-pad-sw:S.align==='center'?canvas.width/2:pad+sw;
+  lines.forEach((line,i)=>{
+    const y=pad+sw+i*lh;
+    if(S.stroke){ctx.strokeStyle=S.strokeColor;ctx.lineWidth=S.strokeWidth*2;ctx.lineJoin='round';ctx.strokeText(line,xBase,y);}
+    ctx.fillStyle=hexToRgba(S.color,S.opacity);
+    ctx.fillText(line,xBase,y);
+  });
+}
+
+function stopAnim() {
+  const ap = document.getElementById('animPreview');
+  ap.style.display = 'none';
+  ap.innerHTML = '';
+  document.getElementById('preview').style.display = 'block';
+}
+
+// ════════════════════════════════════════════
+//  COMPOSITE
+// ════════════════════════════════════════════
+function loadBgImage(input) {
+  const file = input.files[0]; if(!file) return;
+  const img  = new Image();
+  img.onload = () => {
+    bgImage = img;
+    document.getElementById('posGrid').style.display = 'grid';
+    document.getElementById('composeControls').style.display = 'flex';
+    compositeUpdate();
+  };
+  img.src = URL.createObjectURL(file);
+}
+
+function compositeUpdate() {
+  if (!bgImage) return;
+  const cc   = document.getElementById('compositeCanvas');
+  cc.style.display = 'block';
+  const cctx = cc.getContext('2d');
+  const maxW = 640;
+  const sc   = Math.min(1, maxW / bgImage.width);
+  cc.width   = bgImage.width * sc;
+  cc.height  = bgImage.height * sc;
+  cctx.drawImage(bgImage, 0, 0, cc.width, cc.height);
+  const px  = parseInt(document.getElementById('posX').value) / 100;
+  const py  = parseInt(document.getElementById('posY').value) / 100;
+  const ss  = parseInt(document.getElementById('stickerScale').value) / 100;
+  const rot = parseInt(document.getElementById('stickerRotate').value) * Math.PI / 180;
+  const sw  = canvas.width * ss * sc;
+  const sh  = canvas.height * ss * sc;
+  cctx.save();
+  cctx.translate(cc.width*px, cc.height*py);
+  cctx.rotate(rot);
+  cctx.drawImage(canvas, -sw/2, -sh/2, sw, sh);
+  cctx.restore();
+}
+
+// ════════════════════════════════════════════
+//  EXPORT
+// ════════════════════════════════════════════
+function downloadPNG() {
+  const a = document.createElement('a');
+  a.href = canvas.toDataURL('image/png');
+  a.download = 'sticker.png';
+  a.click();
+}
+function downloadComposite() {
+  const cc = document.getElementById('compositeCanvas');
+  const a  = document.createElement('a');
+  a.href   = cc.toDataURL('image/png');
+  a.download = 'sticker-on-photo.png';
+  a.click();
+}
+async function copyToClipboard() {
+  try {
+    canvas.toBlob(async blob => {
+      await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);
+      alert('✓ המדבקה הועתקה ללוח!\nהדבק בכל אפליקציה עם Ctrl+V / Cmd+V');
+    });
+  } catch {
+    alert('העתקה ללוח לא נתמכת בדפדפן זה — השתמש בכפתור הורד PNG.');
+  }
+}
+
+// ════════════════════════════════════════════
+//  PRESETS
+// ════════════════════════════════════════════
+function applyPreset(name) {
+  const P = {
+    neon:     {color:'#00ffcc',shadow:true, shadowColor:'#00ffcc',shadowBlur:28,shadowX:0,shadowY:0,stroke:false},
+    shadow3d: {color:'#ffffff',shadow:true, shadowColor:'#0033cc',shadowBlur:0, shadowX:7,shadowY:7,stroke:true,strokeColor:'#000088',strokeWidth:2},
+    outline:  {color:'#ffffff',stroke:true, strokeColor:'#000000',strokeWidth:7,shadow:false},
+    gold:     {color:'#f5c842',stroke:true, strokeColor:'#7a5500',strokeWidth:3,shadow:true,shadowColor:'#000000',shadowBlur:10,shadowX:4,shadowY:4},
+    fire:     {color:'#ff4400',stroke:true, strokeColor:'#ffaa00',strokeWidth:5,shadow:true,shadowColor:'#ff0000',shadowBlur:22,shadowX:0,shadowY:0},
+    clean:    {color:'#ffffff',stroke:false,shadow:false},
+  };
+  const p = P[name]; if(!p) return;
+  Object.assign(S, p);
+  // sync UI
+  document.getElementById('textColor').value = S.color;
+  document.getElementById('strokeEnabled').checked = !!S.stroke;
+  document.getElementById('strokeControls').style.display = S.stroke ? 'flex' : 'none';
+  if(S.strokeColor) document.getElementById('strokeColor').value = S.strokeColor;
+  document.getElementById('strokeWidth').value = S.strokeWidth||4;
+  document.getElementById('strokeWidthVal').textContent = S.strokeWidth||4;
+  document.getElementById('shadowEnabled').checked = !!S.shadow;
+  document.getElementById('shadowControls').style.display = S.shadow ? 'flex' : 'none';
+  if(S.shadowColor && !S.shadowColor.startsWith('rgba')) document.getElementById('shadowColor').value = S.shadowColor;
+  document.getElementById('shadowBlur').value  = S.shadowBlur||0;
+  document.getElementById('shadowBlurVal').textContent = S.shadowBlur||0;
+  document.getElementById('shadowX').value  = S.shadowX||0;
+  document.getElementById('shadowXVal').textContent = S.shadowX||0;
+  document.getElementById('shadowY').value  = S.shadowY||0;
+  document.getElementById('shadowYVal').textContent = S.shadowY||0;
+  render();
+}
+
+// ════════════════════════════════════════════
+//  WIRING
+// ════════════════════════════════════════════
+document.getElementById('inputText').addEventListener('input', e => { S.text=e.target.value; render(); });
+
+document.getElementById('fontFamily').addEventListener('change', async e => {
+  if (e.target.value === '__custom__') {
+    document.getElementById('customFontFile').click();
+    e.target.value = S.font; return;
+  }
+  S.font = e.target.value;
+  await ensureFontForCanvas(S.font);
+  render();
+});
+
+document.getElementById('customFontFile').addEventListener('change', async e => {
+  const file = e.target.files[0]; if(!file) return;
+  const name = file.name.replace(/\.[^.]+$/,'').replace(/[\s\-]/g,'_');
+  const url  = URL.createObjectURL(file);
+  const fs   = document.getElementById('fontStatus');
+  fs.textContent = `⏳ טוען ${name}…`;
+  try {
+    for (const w of ['300','400','700','900']) {
+      const ff = new FontFace(name, `url(${url})`, {weight:w});
+      await ff.load().then(f => document.fonts.add(f)).catch(()=>{});
+    }
+    loadedForCanvas.add(name);
+    S.font = name;
+    const sel = document.getElementById('fontFamily');
+    const opt = new Option(`${name} (מותאם)`, name);
+    sel.add(opt); sel.value = name;
+    fs.textContent = `✓ ${name} נטען`;
+    setTimeout(()=>fs.textContent='',2000);
+    render();
+  } catch { fs.textContent = '⚠ שגיאה'; }
+});
+
+document.getElementById('fontWeight').addEventListener('change', e => { S.weight=e.target.value; render(); });
+
+function rng(id, key, dispId, tx) {
+  document.getElementById(id).addEventListener('input', e => {
+    const v = parseFloat(e.target.value);
+    S[key] = tx ? tx(v) : v;
+    if (dispId) document.getElementById(dispId).textContent = tx ? tx(v).toFixed(2) : v;
+    render();
+  });
+}
+rng('fontSize','size','fontSizeVal');
+rng('textOpacity','opacity','opacityVal', v => { document.getElementById('opacityVal').textContent=v+'%'; return +(v/100).toFixed(2); });
+rng('lineHeight','lineHeight','lineHeightVal', v => +(v/100).toFixed(2));
+rng('padding','padding','paddingVal');
+rng('strokeWidth','strokeWidth','strokeWidthVal');
+rng('shadowBlur','shadowBlur','shadowBlurVal');
+rng('shadowX','shadowX','shadowXVal');
+rng('shadowY','shadowY','shadowYVal');
+
+document.getElementById('textColor').addEventListener('input',  e => { S.color=e.target.value; render(); });
+document.getElementById('strokeColor').addEventListener('input', e => { S.strokeColor=e.target.value; render(); });
+document.getElementById('shadowColor').addEventListener('input', e => { S.shadowColor=e.target.value; render(); });
+
+document.getElementById('strokeEnabled').addEventListener('change', e => {
+  S.stroke=e.target.checked;
+  document.getElementById('strokeControls').style.display=S.stroke?'flex':'none';
+  render();
+});
+document.getElementById('shadowEnabled').addEventListener('change', e => {
+  S.shadow=e.target.checked;
+  document.getElementById('shadowControls').style.display=S.shadow?'flex':'none';
+  render();
+});
+
+const toggleMap = {tItalic:'italic',tUnder:'underline',tUpper:'uppercase',tRtl:'rtl'};
+Object.entries(toggleMap).forEach(([id,key]) => {
+  document.getElementById(id).addEventListener('click', function() {
+    S[key]=!S[key]; this.classList.toggle('active',S[key]); render();
+  });
+});
+
+document.querySelectorAll('[data-align]').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('[data-align]').forEach(b=>b.classList.remove('active'));
+    this.classList.add('active'); S.align=this.dataset.align; render();
+  });
+});
+
+document.querySelectorAll('[data-anim]').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('[data-anim]').forEach(b=>b.classList.remove('active'));
+    this.classList.add('active'); S.anim=this.dataset.anim;
+    if(S.anim==='none') { stopAnim(); render(); } else renderAnim();
+  });
+});
+
+// Preload fonts on start
+window.addEventListener('load', async () => {
+  await document.fonts.ready;
+  render();
+});
+
+render();
+</script>
+</body>
+</html>
