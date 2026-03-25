@@ -507,22 +507,25 @@ function drawLines(c,lines,W,H,pad,sw2,lh,ox,oy,sc){
 
 function drawArch(c,lines,W,H,pad,sw2,lh){
   c.font=fnt(S.size,S.weight,S.italic,curFont);
+  c.textBaseline='alphabetic'; c.textAlign='center'; c.direction=S.rtl?'rtl':'ltr';
   setShadow();
   lines.forEach((line,li)=>{
-    const chars=[...line]; const total=chars.length;
     const totalW=c.measureText(line).width;
-    const radius=Math.max(totalW,.1)/(Math.PI*.7);
-    const cx=W/2, cy=H/2+radius*(li-lines.length/2+.5)*S.lh*.6;
-    const startAngle=-Math.PI*.35;
-    let currAngle=startAngle;
+    const radius=Math.max(totalW,10)/(Math.PI*0.7);
+    const cx=W/2, cy=H*0.6+radius*(li-lines.length/2)*S.lh*0.8;
+    const chars=[...line];
+    const charWidths=chars.map(ch=>c.measureText(ch).width);
+    const totalCharsW=charWidths.reduce((a,b)=>a+b,0);
+    let currAngle=-totalCharsW/(2*radius);
     chars.forEach((ch,ci)=>{
-      const chW=c.measureText(ch).width;
+      const chW=charWidths[ci];
       const angle=chW/radius;
       c.save();
-      c.translate(cx,cy);
+      c.translate(cx, cy);
       c.rotate(currAngle+angle/2);
       c.translate(0,-radius);
-      drawChar(ch,0,0);
+      if(S.stroke){c.strokeStyle=S.strokeColor;c.lineWidth=S.strokeWidth*2;c.lineJoin='round';c.strokeText(ch,0,0);}
+      c.fillStyle=h2r(S.color,S.opacity); c.fillText(ch,0,0);
       c.restore();
       currAngle+=angle;
     });
@@ -532,17 +535,22 @@ function drawArch(c,lines,W,H,pad,sw2,lh){
 
 function drawWaveShape(c,lines,W,H,pad,sw2,lh){
   c.font=fnt(S.size,S.weight,S.italic,curFont);
+  c.textBaseline='alphabetic'; c.direction=S.rtl?'rtl':'ltr';
   setShadow();
   lines.forEach((line,li)=>{
-    const chars=[...line]; const total=chars.length;
+    const chars=[...line];
     const totalW=c.measureText(line).width;
     const startX=W/2-totalW/2;
-    const baseY=pad+sw2+li*lh+S.size/2+30;
+    const baseY=pad+sw2+(li+1)*lh+30;
     let x=startX;
     chars.forEach((ch,ci)=>{
       const chW=c.measureText(ch).width;
-      const wave=Math.sin((ci/Math.max(total-1,1))*Math.PI*2)*S.size*0.25;
-      drawChar(ch,x+chW/2,baseY+wave);
+      const wave=Math.sin((ci/Math.max(chars.length-1,1))*Math.PI*2)*S.size*0.25;
+      c.save();
+      c.translate(x+chW/2, baseY+wave);
+      if(S.stroke){c.strokeStyle=S.strokeColor;c.lineWidth=S.strokeWidth*2;c.strokeText(ch,0,0);}
+      c.fillStyle=h2r(S.color,S.opacity); c.fillText(ch,0,0);
+      c.restore();
       x+=chW;
     });
   });
@@ -550,45 +558,45 @@ function drawWaveShape(c,lines,W,H,pad,sw2,lh){
 }
 
 function drawBulge(c,lines,W,H,pad,sw2,lh){
-  // Middle chars bigger, edges smaller — like barrel distortion
   c.font=fnt(S.size,S.weight,S.italic,curFont);
+  c.textBaseline='alphabetic'; c.direction=S.rtl?'rtl':'ltr';
   setShadow();
   lines.forEach((line,li)=>{
     const chars=[...line]; const total=chars.length;
     const totalW=c.measureText(line).width;
     let x=W/2-totalW/2;
-    const baseY=pad+sw2+li*lh+S.size/2+30;
+    const baseY=pad+sw2+(li+1)*lh+30;
     chars.forEach((ch,ci)=>{
-      const t=ci/Math.max(total-1,1); // 0..1
-      const sc=0.6+Math.sin(t*Math.PI)*0.8; // small→big→small
+      const t=ci/Math.max(total-1,1);
+      const sc=0.55+Math.sin(t*Math.PI)*0.9;
       const chW=c.measureText(ch).width;
       c.save();
-      c.translate(x+chW/2,baseY);
+      c.translate(x+chW/2, baseY);
       c.scale(sc,sc);
-      if(S.stroke){c.strokeStyle=S.strokeColor;c.lineWidth=S.strokeWidth*2;c.lineJoin='round';c.strokeText(ch,0,0);}
+      if(S.stroke){c.strokeStyle=S.strokeColor;c.lineWidth=S.strokeWidth*2;c.strokeText(ch,0,0);}
       c.fillStyle=h2r(S.color,S.opacity); c.fillText(ch,0,0);
       c.restore();
-      x+=chW*sc*0.85+2;
+      x+=chW*sc*0.9+1;
     });
   });
   clearShadow();
 }
 
 function drawNarrow(c,lines,W,H,pad,sw2,lh){
-  // Letters squeezed at edges, full width in center
   c.font=fnt(S.size,S.weight,S.italic,curFont);
+  c.textBaseline='alphabetic'; c.direction=S.rtl?'rtl':'ltr';
   setShadow();
   lines.forEach((line,li)=>{
     const chars=[...line]; const total=chars.length;
     const totalW=c.measureText(line).width;
     let x=W/2-totalW/2;
-    const baseY=pad+sw2+li*lh+S.size/2+30;
+    const baseY=pad+sw2+(li+1)*lh+30;
     chars.forEach((ch,ci)=>{
       const t=ci/Math.max(total-1,1);
       const scaleX=0.3+Math.sin(t*Math.PI)*0.85;
       const chW=c.measureText(ch).width;
       c.save();
-      c.translate(x+chW/2,baseY);
+      c.translate(x+chW/2, baseY);
       c.scale(scaleX,1);
       if(S.stroke){c.strokeStyle=S.strokeColor;c.lineWidth=S.strokeWidth*2;c.strokeText(ch,0,0);}
       c.fillStyle=h2r(S.color,S.opacity); c.fillText(ch,0,0);
@@ -600,45 +608,36 @@ function drawNarrow(c,lines,W,H,pad,sw2,lh){
 }
 
 function drawScroll(c,lines,W,H,pad,sw2,lh){
-  // Draw scroll/ribbon shape behind text
   const textH=lines.length*lh+pad*2;
-  const textW=Math.max(...lines.map(l=>c.measureText(l).width))+pad*2;
+  const maxW=Math.max(...lines.map(l=>c.measureText(l).width));
+  const textW=maxW+pad*2;
   const rx=W/2-textW/2, ry=pad+sw2;
-  // Scroll body
   c.save();
-  c.globalAlpha=0.18;
-  c.fillStyle=S.color;
-  // Main rect
+  c.globalAlpha=0.15; c.fillStyle=S.color;
   c.fillRect(rx,ry+20,textW,textH-40);
-  // Top curl
-  c.beginPath();c.ellipse(rx+textW/2,ry+20,textW/2,22,0,0,Math.PI*2);c.fill();
-  // Bottom curl
-  c.beginPath();c.ellipse(rx+textW/2,ry+textH-20,textW/2,22,0,0,Math.PI*2);c.fill();
-  c.globalAlpha=1;
-  // Scroll outline
-  c.strokeStyle=S.color; c.lineWidth=2; c.globalAlpha=0.4;
+  c.beginPath();c.ellipse(rx+textW/2,ry+20,textW/2,20,0,0,Math.PI*2);c.fill();
+  c.beginPath();c.ellipse(rx+textW/2,ry+textH-20,textW/2,20,0,0,Math.PI*2);c.fill();
+  c.globalAlpha=0.35; c.strokeStyle=S.color; c.lineWidth=1.5;
   c.strokeRect(rx,ry+20,textW,textH-40);
-  c.beginPath();c.ellipse(rx+textW/2,ry+20,textW/2,22,0,0,Math.PI*2);c.stroke();
-  c.beginPath();c.ellipse(rx+textW/2,ry+textH-20,textW/2,22,0,0,Math.PI*2);c.stroke();
-  c.globalAlpha=1;
-  c.restore();
+  c.beginPath();c.ellipse(rx+textW/2,ry+20,textW/2,20,0,0,Math.PI*2);c.stroke();
+  c.beginPath();c.ellipse(rx+textW/2,ry+textH-20,textW/2,20,0,0,Math.PI*2);c.stroke();
+  c.globalAlpha=1; c.restore();
   drawLines(c,lines,W,H,pad,sw2,lh,0,0,1);
 }
 
 function drawPerspective(c,lines,W,H,pad,sw2,lh){
-  // Top smaller, bottom bigger (perspective)
   c.font=fnt(S.size,S.weight,S.italic,curFont);
+  c.textBaseline='alphabetic'; c.textAlign='center'; c.direction=S.rtl?'rtl':'ltr';
   setShadow();
-  const total=lines.length;
   lines.forEach((line,li)=>{
     const t=lines.length>1?(li/(lines.length-1)):0.5;
-    const sc=0.5+t*0.8;
-    const y=pad+sw2+li*lh*0.8+S.size/2+20;
+    const sc=0.45+t*0.9;
+    const y=pad+sw2+(li+1)*lh*0.85+20;
     c.save();
     c.translate(W/2,y);
     c.scale(sc,sc);
     c.font=fnt(S.size,S.weight,S.italic,curFont);
-    c.textBaseline='middle'; c.textAlign='center';
+    c.textBaseline='alphabetic'; c.textAlign='center';
     if(S.stroke){c.strokeStyle=S.strokeColor;c.lineWidth=S.strokeWidth*2;c.strokeText(line,0,0);}
     c.fillStyle=h2r(S.color,S.opacity); c.fillText(line,0,0);
     c.restore();
@@ -648,19 +647,19 @@ function drawPerspective(c,lines,W,H,pad,sw2,lh){
 
 function drawCircleText(c,lines,W,H,pad,sw2){
   c.font=fnt(S.size,S.weight,S.italic,curFont);
+  c.textBaseline='alphabetic'; c.textAlign='center';
   setShadow();
   const text=lines.join(' ');
   const chars=[...text]; const total=chars.length;
-  const radius=Math.min(W,H)/2-pad-S.size;
+  const radius=Math.min(W,H)/2-pad-S.size*0.8;
   const cx=W/2, cy=H/2;
   chars.forEach((ch,ci)=>{
     const angle=(ci/total)*Math.PI*2-Math.PI/2;
-    const x=cx+Math.cos(angle)*radius;
-    const y=cy+Math.sin(angle)*radius;
     c.save();
-    c.translate(x,y);
+    c.translate(cx+Math.cos(angle)*radius, cy+Math.sin(angle)*radius);
     c.rotate(angle+Math.PI/2);
-    drawChar(ch,0,0);
+    if(S.stroke){c.strokeStyle=S.strokeColor;c.lineWidth=S.strokeWidth*2;c.strokeText(ch,0,0);}
+    c.fillStyle=h2r(S.color,S.opacity); c.fillText(ch,0,0);
     c.restore();
   });
   clearShadow();
