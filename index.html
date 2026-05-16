@@ -1,968 +1,139 @@
-<!DOCTYPE html>
-<html lang="he" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TSC — Text Sticker Creator</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&family=Assistant:wght@300;400;700;800&family=Frank+Ruhl+Libre:wght@400;700;900&family=Rubik:wght@300;400;700;900&family=Secular+One&family=Noto+Sans+Hebrew:wght@300;400;700;900&family=Alef:wght@400;700&family=Miriam+Libre:wght@400;700&family=Varela+Round&family=David+Libre:wght@400;700;900&family=Suez+One&family=Noto+Serif+Hebrew:wght@300;400;700;900&family=Noto+Rashi+Hebrew:wght@300;400;700;900&family=Amatic+SC:wght@400;700&family=Caveat:wght@400;700&family=Permanent+Marker&family=Pacifico&family=Lobster&family=Bebas+Neue&family=Righteous&family=Press+Start+2P&family=Tinos:wght@400;700&family=Arimo:wght@400;700&display=swap" rel="stylesheet">
-<style>
-:root{
-  --bg:#08080f;--surface:#12121c;--surface2:#1c1c28;--border:#262636;
-  --accent:#ff6b6b;--accent2:#4ecdc4;--accent3:#ffe66d;--accent4:#c77dff;
-  --text:#f0f0f8;--muted:#52527a;--radius:10px;
-}
-*{box-sizing:border-box;margin:0;padding:0;}
-body{background:var(--bg);color:var(--text);font-family:'Heebo',Arial,sans-serif;min-height:100vh;display:grid;grid-template-columns:340px 1fr;grid-template-rows:50px 1fr;}
-header{grid-column:1/-1;background:var(--surface);border-bottom:1px solid var(--border);padding:0 18px;display:flex;align-items:center;gap:10px;}
-.logo{font-size:20px;}
-header h1{font-size:15px;font-weight:800;}
-header h1 span{color:var(--accent);}
-.hbadge{margin-right:auto;font-size:10px;color:var(--muted);background:var(--surface2);border:1px solid var(--border);padding:2px 10px;border-radius:20px;}
-aside{background:var(--surface);border-left:1px solid var(--border);padding:11px 10px;overflow-y:auto;display:flex;flex-direction:column;gap:11px;}
-.slabel{font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
-textarea#txt{width:100%;min-height:66px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:15px;padding:9px;resize:vertical;font-family:'Heebo',Arial,sans-serif;line-height:1.5;}
-textarea#txt:focus{outline:none;border-color:var(--accent2);}
-.font-tabs{display:flex;gap:3px;flex-wrap:wrap;margin-bottom:5px;}
-.ftab{background:var(--surface2);border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:3px 8px;font-size:10px;cursor:pointer;transition:all .15s;font-family:'Heebo',Arial,sans-serif;}
-.ftab.active{background:var(--accent2);border-color:var(--accent2);color:#000;font-weight:700;}
-.font-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;}
-.font-btn{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:7px 5px;cursor:pointer;text-align:center;color:var(--text);transition:all .15s;line-height:1.2;}
-.font-btn:hover{border-color:var(--accent2);}
-.font-btn.active{background:rgba(78,205,196,.15);border-color:var(--accent2);color:var(--accent2);}
-.font-btn .fs{font-size:15px;display:block;margin-bottom:1px;}
-.font-btn .fn{font-size:9px;color:var(--muted);}
-select{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:6px 9px;font-size:12px;width:100%;cursor:pointer;font-family:'Heebo',Arial,sans-serif;}
-input[type=range]{padding:0;height:5px;-webkit-appearance:none;border-radius:3px;background:var(--border);cursor:pointer;width:100%;}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--accent);cursor:pointer;}
-input[type=color]{height:31px;padding:2px 4px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;width:100%;}
-.rv{font-size:10px;color:var(--accent);min-width:24px;text-align:left;}
-.row{display:flex;gap:6px;align-items:center;}
-.col{display:flex;flex-direction:column;gap:3px;flex:1;}
-.lbl{font-size:10px;color:var(--muted);}
-.toggles{display:flex;gap:3px;flex-wrap:wrap;}
-.tbtn{background:var(--surface2);border:1px solid var(--border);color:var(--muted);border-radius:7px;padding:4px 9px;font-size:11px;cursor:pointer;transition:all .15s;font-family:'Heebo',Arial,sans-serif;}
-.tbtn.active{background:var(--accent2);border-color:var(--accent2);color:#000;font-weight:700;}
-.erow{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px;display:flex;flex-direction:column;gap:7px;}
-.ehdr{display:flex;align-items:center;justify-content:space-between;font-size:11px;font-weight:700;}
-.sw{position:relative;display:inline-block;width:33px;height:18px;}
-.sw input{opacity:0;width:0;height:0;}
-.sw-s{position:absolute;inset:0;background:var(--border);border-radius:18px;cursor:pointer;transition:.2s;}
-.sw-s::before{content:'';position:absolute;width:12px;height:12px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;}
-.sw input:checked+.sw-s{background:var(--accent2);}
-.sw input:checked+.sw-s::before{transform:translateX(15px);}
-.btn{width:100%;padding:8px;border-radius:var(--radius);font-size:12px;font-weight:700;cursor:pointer;border:none;font-family:'Heebo',Arial,sans-serif;transition:all .15s;}
-.btn-p{background:var(--accent);color:#fff;}
-.btn-p:hover{filter:brightness(1.15);transform:translateY(-1px);}
-.btn-s{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
-.btn-s:hover{border-color:var(--accent2);}
-.btn-g{background:linear-gradient(135deg,var(--accent2),var(--accent3));color:#000;}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:4px;}
-.choice-btn{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 4px;cursor:pointer;text-align:center;font-size:10px;color:var(--muted);transition:all .15s;font-family:'Heebo',Arial,sans-serif;}
-.choice-btn:hover{border-color:var(--accent4);color:var(--accent4);}
-.choice-btn.active{background:rgba(199,125,255,.15);border-color:var(--accent4);color:var(--accent4);}
-.choice-icon{font-size:13px;display:block;margin-bottom:2px;}
-.anim-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;}
-.abtn{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:5px 2px;cursor:pointer;text-align:center;font-size:9px;color:var(--muted);transition:all .15s;font-family:'Heebo',Arial,sans-serif;}
-.abtn:hover{border-color:var(--accent);color:var(--accent);}
-.abtn.active{background:rgba(255,107,107,.15);border-color:var(--accent);color:var(--accent);}
-.abtn-icon{font-size:12px;display:block;margin-bottom:1px;}
-#gifStatus{font-size:10px;color:var(--accent3);min-height:13px;margin-top:3px;}
-#fontStatus{font-size:10px;color:var(--accent2);min-height:12px;margin-top:2px;}
+export default function GimlaTechSite() {
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white text-slate-800" dir="rtl">
+      {/* Hero Section */}
+      <section className="px-6 py-16 text-center">
+        <div className="max-w-5xl mx-auto">
+          <h1 className="text-5xl font-bold text-blue-700 mb-6">
+            גימלאטק
+          </h1>
+          <p className="text-2xl mb-6 leading-relaxed">
+            קהילת מתנדבים בני 60+ המסייעת לבני הגיל השלישי להתמודד
+            עם האתגרים הדיגיטליים של העולם המודרני.
+          </p>
 
-/* MAIN */
-main{display:flex;flex-direction:column;align-items:center;padding:18px 14px;gap:13px;background:var(--bg);overflow-y:auto;}
+          <p className="text-lg text-slate-600 max-w-3xl mx-auto leading-relaxed">
+            אנחנו מאמינים שלכל אדם מגיעה גישה בטוחה, פשוטה ומכבדת לעולם
+            הדיגיטלי — מהטלפון החכם ועד שירותים מקוונים, וואטסאפ,
+            אפליקציות, הגנה מהונאות ועוד.
+          </p>
 
-/* CANVAS WRAPPER with handles */
-.cwrap-outer{position:relative;display:inline-block;}
-.cwrap{position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--border);box-shadow:0 16px 50px rgba(0,0,0,.6);display:inline-block;}
-.cbg{position:absolute;inset:0;background-image:linear-gradient(45deg,#1a1a26 25%,transparent 25%),linear-gradient(-45deg,#1a1a26 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#1a1a26 75%),linear-gradient(-45deg,transparent 75%,#1a1a26 75%);background-size:16px 16px;background-position:0 0,0 8px,8px -8px,-8px 0;background-color:#141420;}
-canvas#cv{position:relative;display:block;max-width:640px;max-height:340px;}
-#animDiv{display:none;min-width:100px;min-height:60px;align-items:center;justify-content:center;padding:14px;position:relative;}
+          <div className="mt-10 flex flex-wrap justify-center gap-4">
+            <a
+              href="https://chat.whatsapp.com/IUUeNscv3jv4AaqlVPMGxr"
+              target="_blank"
+              className="bg-green-500 hover:bg-green-600 text-white px-6 py-4 rounded-2xl text-lg shadow-lg transition"
+            >
+              קבוצת הסיוע בוואטסאפ
+            </a>
 
-/* HANDLES */
-.handles{position:absolute;inset:0;pointer-events:none;}
-.handle{position:absolute;width:14px;height:14px;background:var(--accent2);border:2px solid #fff;border-radius:50%;pointer-events:all;cursor:pointer;transform:translate(-50%,-50%);z-index:10;transition:background .15s;}
-.handle:hover{background:var(--accent);}
-#hTL{top:0;left:0;}
-#hTR{top:0;right:0;transform:translate(50%,-50%);}
-#hBL{bottom:0;left:0;transform:translate(-50%,50%);}
-#hBR{bottom:0;right:0;transform:translate(50%,50%);}
-#hTC{top:0;left:50%;transform:translate(-50%,-50%);}
-#hBC{bottom:0;left:50%;transform:translate(-50%,50%);}
+            <a
+              href="https://chat.whatsapp.com/GePPP0AMH5C8ZclRSS2wmm"
+              target="_blank"
+              className="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-4 rounded-2xl text-lg shadow-lg transition"
+            >
+              קבוצת הטיפים
+            </a>
+          </div>
+        </div>
+      </section>
 
-.hint{font-size:11px;color:var(--muted);text-align:center;}
+      {/* About */}
+      <section className="px-6 py-14 bg-white">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl font-bold text-blue-700 mb-6">
+            מי אנחנו
+          </h2>
 
-/* PREVIEW MODAL */
-#previewModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:1000;align-items:center;justify-content:center;flex-direction:column;gap:16px;}
-#previewModal.show{display:flex;}
-#previewModalImg{max-width:90vw;max-height:65vh;border-radius:12px;background:repeating-conic-gradient(#444 0% 25%,#222 0% 50%) 0 0/20px 20px;}
-#previewGif{max-width:90vw;max-height:65vh;border-radius:12px;display:none;}
-.modal-btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
-.modal-btns .btn{width:auto;padding:10px 22px;}
+          <div className="bg-blue-50 border border-blue-100 rounded-3xl p-8 shadow-sm text-lg leading-relaxed text-slate-700">
+            כאן יופיע בהמשך דף "מי אנחנו" עם סיפור הקבוצה,
+            הפעילות ההתנדבותית, החזון והאנשים שמאחורי גימלאטק.
+          </div>
+        </div>
+      </section>
 
-.carea{width:100%;max-width:650px;background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:12px;}
-.carea h3{font-size:10px;color:var(--muted);margin-bottom:7px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;}
-.dzone{border:2px dashed var(--border);border-radius:9px;padding:16px;text-align:center;cursor:pointer;transition:border-color .2s;color:var(--muted);font-size:12px;}
-.dzone:hover{border-color:var(--accent2);}
-.dzone input{display:none;}
-#cc{width:100%;border-radius:8px;display:none;margin-top:9px;border:1px solid var(--border);}
-.pgrid{display:none;grid-template-columns:1fr 1fr;gap:6px;margin-top:7px;}
-#cctrl{display:none;gap:6px;margin-top:6px;flex-wrap:wrap;}
-#cctrl .btn{flex:1;min-width:90px;}
-::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
-</style>
-</head>
-<body>
-<header>
-  <span class="logo">✦</span>
-  <h1>Text <span>Sticker</span> Creator</h1>
-  <span class="hbadge">PNG · GIF · עברית · אמוג'י</span>
-</header>
+      {/* Volunteer Section */}
+      <section className="px-6 py-16 bg-gradient-to-r from-blue-100 to-cyan-50">
+        <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-10 items-center">
+          <div>
+            <h2 className="text-4xl font-bold text-blue-800 mb-6">
+              רוצים להצטרף אלינו כמתנדבים?
+            </h2>
 
-<!-- PREVIEW MODAL -->
-<div id="previewModal">
-  <img id="previewModalImg" src="" alt="תצוגה מקדימה">
-  <img id="previewGif" src="" alt="GIF">
-  <div class="modal-btns">
-    <button class="btn btn-p" onclick="modalDownload()">⬇ הורד</button>
-    <button class="btn btn-s" onclick="closePreview()">✕ סגור</button>
-  </div>
-</div>
+            <p className="text-lg leading-relaxed mb-6 text-slate-700">
+              אם אתם אוהבים אנשים, סבלניים לטכנולוגיה ורוצים לעשות טוב —
+              אנחנו מזמינים אתכם להצטרף למשפחת גימלאטק.
+            </p>
 
-<aside>
-  <div>
-    <div class="slabel">טקסט</div>
-    <textarea id="txt">שלום עולם! 🌟</textarea>
-  </div>
+            <p className="text-lg leading-relaxed mb-8 text-slate-700">
+              המתנדבים שלנו מסייעים לבני הגיל השלישי ברכישת ביטחון בעולם
+              הדיגיטלי, בשימוש בטלפונים חכמים, אפליקציות, תקשורת,
+              בטיחות ברשת ועוד.
+            </p>
 
-  <div>
-    <div class="slabel">פונט</div>
-    <div class="font-tabs" id="fontTabs"></div>
-    <div class="font-grid" id="fontGrid"></div>
-    <div id="fontStatus"></div>
-    <button class="btn btn-s" onclick="document.getElementById('cff').click()" style="margin-top:5px;font-size:10px;padding:5px">+ טען פונט מהמחשב (TTF/OTF)</button>
-    <input type="file" id="cff" accept=".ttf,.otf,.woff,.woff2" style="display:none">
-  </div>
+            <a
+              href="https://render.jotform.com/230454588342055"
+              target="_blank"
+              className="inline-block bg-blue-700 hover:bg-blue-800 text-white px-8 py-4 rounded-2xl text-xl shadow-lg transition"
+            >
+              הצטרפות להתנדבות בגימלאטק
+            </a>
+          </div>
 
-  <div>
-    <div class="slabel">גודל ומשקל</div>
-    <div class="row" style="gap:5px"><input type="range" id="sz" min="16" max="280" value="72"><span class="rv" id="szv">72</span></div>
-    <div style="margin-top:5px"><select id="fw"><option value="300">דק 300</option><option value="400">רגיל 400</option><option value="700" selected>מודגש 700</option><option value="900">שחור 900</option></select></div>
-  </div>
+          <div className="bg-white rounded-3xl p-8 shadow-xl border border-blue-100">
+            <h3 className="text-2xl font-bold text-blue-700 mb-6 text-center">
+              למה להצטרף?
+            </h3>
 
-  <div>
-    <div class="slabel">סגנון וכיוון</div>
-    <div class="toggles">
-      <button class="tbtn" id="tI">𝘐 נטוי</button>
-      <button class="tbtn" id="tU">U̲ קו</button>
-      <button class="tbtn" id="tUP">AA</button>
-      <button class="tbtn active" id="tR">RTL</button>
+            <ul className="space-y-4 text-lg text-slate-700">
+              <li>✔ לעזור לאנשים להרגיש בטוחים בעולם הדיגיטלי</li>
+              <li>✔ ליצור קהילה תומכת ומחברת</li>
+              <li>✔ לחלוק ידע וניסיון חיים</li>
+              <li>✔ להישאר פעילים, מעורבים ומשמעותיים</li>
+              <li>✔ להשפיע באמת על איכות החיים של אחרים</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      {/* Contact */}
+      <section className="px-6 py-14 bg-white">
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="text-3xl font-bold text-blue-700 mb-8">
+            צרו קשר
+          </h2>
+
+          <div className="space-y-4 text-lg">
+            <p>
+              📞 טלפון:
+              <a
+                href="tel:+972503960685"
+                className="text-blue-700 font-semibold mr-2"
+              >
+                050-3960685
+              </a>
+            </p>
+
+            <p>
+              📘 פייסבוק:
+              <a
+                href="https://www.facebook.com/share/1DFVqgGuin/"
+                target="_blank"
+                className="text-blue-700 font-semibold mr-2 underline"
+              >
+                לדף הפייסבוק של גימלאטק
+              </a>
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-blue-800 text-white text-center py-6 mt-10">
+        <p className="text-sm">
+          גימלאטק © 2026 | קהילה, תמיכה וטכנולוגיה בגובה העיניים
+        </p>
+      </footer>
     </div>
-  </div>
-
-  <div>
-    <div class="slabel">יישור</div>
-    <div class="toggles">
-      <button class="tbtn active" data-align="right">⬅ ימין</button>
-      <button class="tbtn" data-align="center">⬌ מרכז</button>
-      <button class="tbtn" data-align="left">➡ שמאל</button>
-    </div>
-  </div>
-
-  <div>
-    <div class="slabel">🔤 צורת טקסט</div>
-    <div class="grid2">
-      <button class="choice-btn active" data-shape="normal"><span class="choice-icon">▬</span>רגיל</button>
-      <button class="choice-btn" data-shape="arch"><span class="choice-icon">⌢</span>קשת</button>
-      <button class="choice-btn" data-shape="wave"><span class="choice-icon">〜</span>גל</button>
-      <button class="choice-btn" data-shape="bulge"><span class="choice-icon">◉</span>בליטה</button>
-      <button class="choice-btn" data-shape="narrow"><span class="choice-icon">⟨⟩</span>צר→רחב</button>
-      <button class="choice-btn" data-shape="scroll"><span class="choice-icon">📜</span>מגילה</button>
-      <button class="choice-btn" data-shape="perspective"><span class="choice-icon">⬡</span>פרספקטיבה</button>
-      <button class="choice-btn" data-shape="circle"><span class="choice-icon">○</span>עיגול</button>
-    </div>
-  </div>
-
-  <div>
-    <div class="slabel">צבע ואטימות</div>
-    <div class="row">
-      <div class="col"><label class="lbl">טקסט</label><input type="color" id="tc" value="#ffffff"></div>
-      <div class="col"><label class="lbl">אטימות <span class="rv" id="opv">100%</span></label><input type="range" id="op" min="10" max="100" value="100"></div>
-    </div>
-  </div>
-
-  <div><div class="slabel">מרווח שורות <span class="rv" id="lhv">1.3</span></div><input type="range" id="lh" min="80" max="220" value="130"></div>
-
-  <div class="erow">
-    <div class="ehdr"><span>✏️ מסגרת</span><label class="sw"><input type="checkbox" id="stEn"><span class="sw-s"></span></label></div>
-    <div id="stC" style="display:none;flex-direction:column;gap:6px">
-      <div class="row">
-        <div class="col"><label class="lbl">צבע</label><input type="color" id="stCol" value="#000000"></div>
-        <div class="col"><label class="lbl">עובי <span class="rv" id="stWv">4</span></label><input type="range" id="stW" min="1" max="30" value="4"></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="erow">
-    <div class="ehdr"><span>💫 צל/זוהר</span><label class="sw"><input type="checkbox" id="shEn"><span class="sw-s"></span></label></div>
-    <div id="shC" style="display:none;flex-direction:column;gap:6px">
-      <div class="row">
-        <div class="col"><label class="lbl">צבע</label><input type="color" id="shCol" value="#000000"></div>
-        <div class="col"><label class="lbl">טשטוש <span class="rv" id="shBv">10</span></label><input type="range" id="shB" min="0" max="60" value="10"></div>
-      </div>
-      <div class="row">
-        <div class="col"><label class="lbl">X <span class="rv" id="shXv">3</span></label><input type="range" id="shX" min="-30" max="30" value="3"></div>
-        <div class="col"><label class="lbl">Y <span class="rv" id="shYv">3</span></label><input type="range" id="shY" min="-30" max="30" value="3"></div>
-      </div>
-    </div>
-  </div>
-
-  <div>
-    <div class="slabel">פריסטים מהירים</div>
-    <div class="grid2">
-      <button class="choice-btn" onclick="preset('neon')">🌟 ניאון</button>
-      <button class="choice-btn" onclick="preset('gold')">✨ זהב</button>
-      <button class="choice-btn" onclick="preset('outline')">⬜ קונטור</button>
-      <button class="choice-btn" onclick="preset('fire')">🔥 אש</button>
-      <button class="choice-btn" onclick="preset('3d')">🎭 3D</button>
-      <button class="choice-btn" onclick="preset('clean')">🌿 נקי</button>
-    </div>
-  </div>
-
-  <div><div class="slabel">ריפוד <span class="rv" id="pdv">30</span>px</div><input type="range" id="pd" min="0" max="120" value="30"></div>
-
-  <div>
-    <div class="slabel">📐 גודל מדבקה</div>
-    <div class="grid2">
-      <button class="choice-btn" data-minsize="400"><span class="choice-icon">🔹</span>קטן</button>
-      <button class="choice-btn active" data-minsize="800"><span class="choice-icon">📱</span>טלפון</button>
-      <button class="choice-btn" data-minsize="1200"><span class="choice-icon">🖼</span>גדול</button>
-      <button class="choice-btn" data-minsize="1600"><span class="choice-icon">🖥</span>ענק</button>
-    </div>
-  </div>
-
-  <div>
-    <div class="slabel">🎬 אנימציה</div>
-    <div class="anim-grid">
-      <button class="abtn active" data-anim="none"><span class="abtn-icon">🚫</span>ללא</button>
-      <button class="abtn" data-anim="typewriter"><span class="abtn-icon">⌨️</span>כתיבה</button>
-      <button class="abtn" data-anim="wave"><span class="abtn-icon">🌊</span>גל</button>
-      <button class="abtn" data-anim="pop"><span class="abtn-icon">💥</span>פופ</button>
-      <button class="abtn" data-anim="zoom"><span class="abtn-icon">🔍</span>זום</button>
-      <button class="abtn" data-anim="slide"><span class="abtn-icon">➡️</span>כניסה</button>
-      <button class="abtn" data-anim="rainbow"><span class="abtn-icon">🌈</span>קשת</button>
-      <button class="abtn" data-anim="shake"><span class="abtn-icon">📳</span>רטט</button>
-      <button class="abtn" data-anim="bounce"><span class="abtn-icon">🏀</span>קפיצה</button>
-      <button class="abtn" data-anim="spin"><span class="abtn-icon">🌀</span>סיבוב</button>
-      <button class="abtn" data-anim="flip"><span class="abtn-icon">🔄</span>הפיכה</button>
-      <button class="abtn" data-anim="blur"><span class="abtn-icon">✨</span>זוהר</button>
-    </div>
-    <div id="twSpeed" style="display:none;margin-top:5px">
-      <div class="slabel">מהירות <span class="rv" id="twSpeedV">150ms</span></div>
-      <input type="range" id="twSpeedR" min="50" max="500" value="150" oninput="S.twSpeed=+this.value;document.getElementById('twSpeedV').textContent=this.value+'ms';if(S.anim==='typewriter')renderAnim(getLines())">
-    </div>
-    <div id="gifStatus"></div>
-    <button class="btn btn-g" id="gifBtn" onclick="showGIFPreview()" style="display:none;margin-top:5px">👁 תצוגה מקדימה + הורד GIF</button>
-  </div>
-
-  <div style="display:flex;flex-direction:column;gap:5px">
-    <button class="btn btn-p" onclick="showPNGPreview()">👁 תצוגה מקדימה + הורד PNG</button>
-    <button class="btn btn-s" onclick="copyClip()">📋 העתק ללוח</button>
-  </div>
-</aside>
-
-<main>
-  <div class="cwrap-outer">
-    <div class="cwrap" id="cwrap">
-      <div class="cbg"></div>
-      <canvas id="cv" width="600" height="200"></canvas>
-      <div id="animDiv"></div>
-    </div>
-    <!-- 6 resize handles -->
-    <div class="handles" id="handles">
-      <div class="handle" id="hTL" data-handle="tl"></div>
-      <div class="handle" id="hTC" data-handle="tc"></div>
-      <div class="handle" id="hTR" data-handle="tr"></div>
-      <div class="handle" id="hBL" data-handle="bl"></div>
-      <div class="handle" id="hBC" data-handle="bc"></div>
-      <div class="handle" id="hBR" data-handle="br"></div>
-    </div>
-  </div>
-  <p class="hint">גרור את הנקודות הכחולות לשינוי גודל · רקע משובץ = שקיפות</p>
-
-  <div class="carea">
-    <h3>🖼 הדבק על תמונה</h3>
-    <div class="dzone" onclick="document.getElementById('bgi').click()">
-      <input type="file" id="bgi" accept="image/*" onchange="loadBg(this)">
-      <div style="font-size:20px;margin-bottom:3px">🖼</div>לחץ לבחירת תמונת רקע
-    </div>
-    <canvas id="cc"></canvas>
-    <div class="pgrid" id="pg">
-      <div><label class="lbl">X</label><input type="range" id="px" min="0" max="100" value="50" oninput="compUpdate()"></div>
-      <div><label class="lbl">Y</label><input type="range" id="py" min="0" max="100" value="50" oninput="compUpdate()"></div>
-      <div><label class="lbl">גודל %</label><input type="range" id="psc" min="5" max="150" value="60" oninput="compUpdate()"></div>
-      <div><label class="lbl">סיבוב</label><input type="range" id="pro" min="-180" max="180" value="0" oninput="compUpdate()"></div>
-    </div>
-    <div id="cctrl">
-      <button class="btn btn-s" style="flex:1" onclick="document.getElementById('bgi').click()">🔄 החלף</button>
-      <button class="btn btn-p" style="flex:1" onclick="dlComp()">⬇ הורד תמונה</button>
-    </div>
-  </div>
-</main>
-
-<script>
-// ══════════════════════════════════════
-//  FONTS
-// ══════════════════════════════════════
-const REPO_BASE=(location.hostname==='prevital-eng.github.io')?'https://prevital-eng.github.io/TSC/':'./';
-const FONT_CATS={
-  'עברית מודרני':[
-    {name:'Heebo',sample:'שלום',desc:'עגול נקי'},
-    {name:'Assistant',sample:'שלום',desc:'רגוע'},
-    {name:'Rubik',sample:'שלום',desc:'חזק'},
-    {name:'Noto Sans Hebrew',sample:'שלום',desc:'ניטרלי'},
-    {name:'Alef',sample:'שלום',desc:'פשוט'},
-    {name:'Varela Round',sample:'שלום',desc:'עגלגל'},
-    {name:'Secular One',sample:'שלום',desc:'מרובע'},
-    {name:'Arimo',sample:'שלום',desc:'Arial-עברי'},
-  ],
-  'עברית סריף':[
-    {name:'Frank Ruhl Libre',sample:'שלום',desc:'קלאסי'},
-    {name:'David Libre',sample:'שלום',desc:'David'},
-    {name:'Suez One',sample:'שלום',desc:'כותרות'},
-    {name:'Noto Serif Hebrew',sample:'שלום',desc:'סריף'},
-    {name:'Noto Rashi Hebrew',sample:'שלום',desc:'רש״י'},
-    {name:'Tinos',sample:'שלום',desc:'Times'},
-    {name:'Miriam Libre',sample:'שלום',desc:'בגרות'},
-  ],
-  'כתב יד':[
-    {name:'GveretLevin',sample:'שלום',desc:'גברת לוין',file:'GveretLevin-Regular.ttf'},
-    {name:'PlaypenSansHebrew',sample:'שלום',desc:'עגול ידני',file:'PlaypenSansHebrew-VariableFont_wght.ttf'},
-    {name:'Solitreo',sample:'שלום',desc:'ספרדי עתיק',file:'Solitreo-Regular.ttf'},
-    {name:'RubikScribble',sample:'שלום',desc:'סקריבל',file:'RubikScribble-Regular.ttf'},
-    {name:'Amatic SC',sample:'שלום',desc:'ידני דק'},
-    {name:'Caveat',sample:'שלום',desc:'כתב יד'},
-    {name:'Permanent Marker',sample:'Hello',desc:'מרקר'},
-    {name:'Gisha',sample:'שלום',desc:'Windows'},
-    {name:'Narkisim',sample:'שלום',desc:'Windows'},
-  ],
-  'עיצובי':[
-    {name:'Pacifico',sample:'Hello',desc:'מעוגל'},
-    {name:'Lobster',sample:'Hello',desc:'כרזה'},
-    {name:'Bebas Neue',sample:'HELLO',desc:'קפיטל'},
-    {name:'Righteous',sample:'Hello',desc:'עגול'},
-    {name:'Press Start 2P',sample:'HI',desc:'פיקסל'},
-  ],
-};
-const loadedFonts=new Set(['Arial','Georgia','Impact','Verdana','Tahoma','Courier New','Gisha','Narkisim']);
-let curFont='Heebo',curCat='עברית מודרני';
-
-async function loadRepoFonts(){
-  for(const f of FONT_CATS['כתב יד'].filter(x=>x.file)){
-    if(loadedFonts.has(f.name))continue;
-    try{const ff=new FontFace(f.name,`url(${REPO_BASE}${f.file})`);await ff.load().then(x=>{document.fonts.add(x);loadedFonts.add(f.name);});}catch(e){}
-  }
-  buildGrid();
+  );
 }
-function buildTabs(){
-  const t=document.getElementById('fontTabs');t.innerHTML='';
-  Object.keys(FONT_CATS).forEach(cat=>{
-    const b=document.createElement('button');b.className='ftab'+(cat===curCat?' active':'');b.textContent=cat;
-    b.onclick=()=>{document.querySelectorAll('.ftab').forEach(x=>x.classList.remove('active'));b.classList.add('active');curCat=cat;buildGrid();};
-    t.appendChild(b);
-  });
-}
-function buildGrid(){
-  const g=document.getElementById('fontGrid');g.innerHTML='';
-  (FONT_CATS[curCat]||[]).forEach(f=>{
-    const b=document.createElement('button');b.className='font-btn'+(f.name===curFont?' active':'');
-    b.innerHTML=`<span class="fs" style="font-family:'${f.name}',serif">${f.sample}</span><span class="fn">${f.name.split(' ')[0]}·${f.desc}</span>`;
-    b.onclick=async()=>{document.querySelectorAll('.font-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');curFont=f.name;await loadFont(f.name);render();};
-    g.appendChild(b);
-  });
-}
-async function loadFont(name){
-  if(loadedFonts.has(name))return;
-  const st=document.getElementById('fontStatus');st.textContent=`⏳ ${name}…`;
-  await document.fonts.ready;let t=0;
-  while(!document.fonts.check(`700 20px "${name}"`)&&t<40){await new Promise(r=>setTimeout(r,100));t++;}
-  loadedFonts.add(name);st.textContent=`✓ ${name}`;setTimeout(()=>st.textContent='',1500);
-}
-document.getElementById('cff').addEventListener('change',async e=>{
-  const file=e.target.files[0];if(!file)return;
-  const name=file.name.replace(/\.[^.]+$/,'').replace(/[\s\-]/g,'_');
-  const st=document.getElementById('fontStatus');st.textContent=`⏳ ${name}…`;
-  try{
-    const url=URL.createObjectURL(file);
-    for(const w of['300','400','700','900']){const ff=new FontFace(name,`url(${url})`,{weight:w});await ff.load().then(f=>document.fonts.add(f)).catch(()=>{});}
-    loadedFonts.add(name);curFont=name;
-    if(!FONT_CATS['מותאם'])FONT_CATS['מותאם']=[];
-    FONT_CATS['מותאם'].unshift({name,sample:'שלום',desc:name.slice(0,10)});
-    curCat='מותאם';buildTabs();buildGrid();
-    st.textContent=`✓ ${name}`;setTimeout(()=>st.textContent='',2000);render();
-  }catch{st.textContent='⚠ שגיאה';}
-});
-
-// ══════════════════════════════════════
-//  STATE
-// ══════════════════════════════════════
-const S={
-  text:'שלום עולם! 🌟',size:72,weight:'700',
-  italic:false,underline:false,uppercase:false,rtl:true,align:'right',
-  color:'#ffffff',opacity:1,lh:1.3,
-  stroke:false,strokeColor:'#000000',strokeWidth:4,
-  shadow:false,shadowColor:'#000000',shadowBlur:10,shadowX:3,shadowY:3,
-  pad:30,anim:'none',shape:'normal',twSpeed:150,minSize:800,
-  // user-controlled canvas size via handles
-  userW:null,userH:null,
-};
-const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
-let bgImg=null;
-function getLines(){let l=S.text.split('\n');if(S.uppercase)l=l.map(x=>x.toUpperCase());return l;}
-function h2r(hex,a){if(!hex||hex.startsWith('rgba'))return hex;const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return `rgba(${r},${g},${b},${a})`;}
-function fnt(sz,w,it,fam){return `${it?'italic ':''}${w} ${sz}px "${fam}","Heebo",Arial,sans-serif`;}
-
-// ══════════════════════════════════════
-//  RENDER — clean RTL using manual x calc
-// ══════════════════════════════════════
-function measureLines(lines){
-  ctx.font=fnt(S.size,S.weight,S.italic,curFont);
-  ctx.direction='ltr';ctx.textBaseline='alphabetic';ctx.textAlign='left';
-  return lines.map(l=>ctx.measureText(l).width);
-}
-function lineX(lw,W){
-  const pad=S.pad,sw2=S.stroke?S.strokeWidth*2:0;
-  if(S.rtl){
-    if(S.align==='right')      return W-pad-sw2-lw;
-    if(S.align==='center')     return (W-lw)/2;
-    return pad+sw2;
-  } else {
-    if(S.align==='left')       return pad+sw2;
-    if(S.align==='center')     return (W-lw)/2;
-    return W-pad-sw2-lw;
-  }
-}
-
-function renderStatic(lines){
-  const lws=measureLines(lines);
-  const maxW=Math.max(10,...lws);
-  const lh=S.size*S.lh,pad=S.pad,sw2=S.stroke?S.strokeWidth*2:0;
-  const autoW=Math.ceil(maxW+pad*2+sw2*2+40);
-  const autoH=Math.ceil(lines.length*lh+pad*2+sw2*2+20);
-  const W=S.userW||Math.max(S.minSize,autoW);
-  const H=S.userH||Math.max(Math.round(S.minSize*0.5),autoH);
-
-  cv.width=W;cv.height=H;
-  ctx.clearRect(0,0,W,H);
-  // Must reset after resize
-  ctx.font=fnt(S.size,S.weight,S.italic,curFont);
-  ctx.direction='ltr';ctx.textBaseline='alphabetic';ctx.textAlign='left';
-
-  if(S.shape!=='normal'){
-    drawShape(lines,lws,W,H,pad,sw2,lh);
-    return;
-  }
-
-  if(S.shadow){ctx.shadowColor=S.shadowColor;ctx.shadowBlur=S.shadowBlur;ctx.shadowOffsetX=S.shadowX;ctx.shadowOffsetY=S.shadowY;}
-  lines.forEach((line,i)=>{
-    const lw=lws[i];
-    const x=lineX(lw,W);
-    const y=pad+sw2+(i+1)*lh;
-    if(S.stroke){ctx.strokeStyle=S.strokeColor;ctx.lineWidth=S.strokeWidth*2;ctx.lineJoin='round';ctx.strokeText(line,x,y);}
-    ctx.fillStyle=h2r(S.color,S.opacity);ctx.fillText(line,x,y);
-    if(S.underline){
-      ctx.shadowColor='transparent';ctx.shadowBlur=0;
-      ctx.fillRect(x,y+4,lw,Math.max(1,S.size*.06));
-      if(S.shadow){ctx.shadowColor=S.shadowColor;ctx.shadowBlur=S.shadowBlur;}
-    }
-  });
-  ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetX=0;ctx.shadowOffsetY=0;
-  positionHandles();
-}
-
-// ══════════════════════════════════════
-//  SHAPES — all RTL-correct
-// ══════════════════════════════════════
-function setSh(){if(S.shadow){ctx.shadowColor=S.shadowColor;ctx.shadowBlur=S.shadowBlur;ctx.shadowOffsetX=S.shadowX;ctx.shadowOffsetY=S.shadowY;}}
-function clrSh(){ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetX=0;ctx.shadowOffsetY=0;}
-function drawCh(ch,x,y){
-  if(S.stroke){ctx.strokeStyle=S.strokeColor;ctx.lineWidth=S.strokeWidth*2;ctx.lineJoin='round';ctx.strokeText(ch,x,y);}
-  ctx.fillStyle=h2r(S.color,S.opacity);ctx.fillText(ch,x,y);
-}
-
-function drawShape(lines,lws,W,H,pad,sw2,lh){
-  ctx.font=fnt(S.size,S.weight,S.italic,curFont);
-  ctx.direction='ltr';ctx.textBaseline='alphabetic';ctx.textAlign='left';
-  setSh();
-
-  lines.forEach((line,li)=>{
-    const chars=[...line];const total=chars.length;
-    const lw=lws[li];
-    const startX=lineX(lw,W);
-    const baseY=pad+sw2+(li+1)*lh;
-
-    switch(S.shape){
-
-      case 'arch':{
-        // Arc centered on canvas
-        const r=Math.max(lw,10)/(Math.PI*0.75);
-        const cy=H*0.6+r*(li-(lines.length-1)/2)*S.lh*0.8;
-        let angle=-lw/(2*r);
-        chars.forEach(ch=>{
-          const cw=ctx.measureText(ch).width;
-          ctx.save();
-          ctx.translate(W/2,cy);
-          ctx.rotate(angle+cw/(2*r));
-          ctx.translate(0,-r);
-          drawCh(ch,0,0);
-          ctx.restore();
-          angle+=cw/r;
-        });
-        break;
-      }
-
-      case 'wave':{
-        let x=startX;
-        chars.forEach((ch,ci)=>{
-          const cw=ctx.measureText(ch).width;
-          const wy=Math.sin((ci/Math.max(total-1,1))*Math.PI*2)*S.size*.22;
-          ctx.save();ctx.translate(x+cw/2,baseY+wy);
-          drawCh(ch,0,0);ctx.restore();
-          x+=cw;
-        });
-        break;
-      }
-
-      case 'bulge':{
-        let x=startX;
-        chars.forEach((ch,ci)=>{
-          const t=ci/Math.max(total-1,1);
-          const sc=0.5+Math.sin(t*Math.PI)*0.9;
-          const cw=ctx.measureText(ch).width;
-          ctx.save();ctx.translate(x+cw/2,baseY);ctx.scale(sc,sc);
-          drawCh(ch,0,0);ctx.restore();
-          x+=cw*sc*.88+1;
-        });
-        break;
-      }
-
-      case 'narrow':{
-        let x=startX;
-        chars.forEach((ch,ci)=>{
-          const t=ci/Math.max(total-1,1);
-          const sx=0.25+Math.sin(t*Math.PI)*0.9;
-          const cw=ctx.measureText(ch).width;
-          ctx.save();ctx.translate(x+cw/2,baseY);ctx.scale(sx,1);
-          drawCh(ch,0,0);ctx.restore();
-          x+=cw*sx*.88+1;
-        });
-        break;
-      }
-
-      case 'scroll':{
-        // Scroll background aligned with text
-        const maxLw=Math.max(...lws);
-        const tW=maxLw+pad*2,tH=lines.length*lh+pad*1.5;
-        const rx=lineX(maxLw,W)-pad,ry=pad+sw2-lh*.3;
-        clrSh();
-        ctx.save();
-        ctx.globalAlpha=.18;ctx.fillStyle=S.color;
-        ctx.fillRect(rx,ry+14,tW,tH-28);
-        ctx.beginPath();ctx.ellipse(rx+tW/2,ry+14,tW/2,14,0,0,Math.PI*2);ctx.fill();
-        ctx.beginPath();ctx.ellipse(rx+tW/2,ry+tH-14,tW/2,14,0,0,Math.PI*2);ctx.fill();
-        ctx.globalAlpha=.3;ctx.strokeStyle=S.color;ctx.lineWidth=1.5;
-        ctx.strokeRect(rx,ry+14,tW,tH-28);
-        ctx.restore();
-        setSh();
-        // Draw text on top
-        lines.forEach((line2,li2)=>{
-          const lw2=lws[li2];
-          const x2=lineX(lw2,W);
-          const y2=pad+sw2+(li2+1)*lh;
-          if(S.stroke){ctx.strokeStyle=S.strokeColor;ctx.lineWidth=S.strokeWidth*2;ctx.lineJoin='round';ctx.strokeText(line2,x2,y2);}
-          ctx.fillStyle=h2r(S.color,S.opacity);ctx.fillText(line2,x2,y2);
-        });
-        break;
-      }
-
-      case 'perspective':{
-        const t=lines.length>1?li/(lines.length-1):0.5;
-        const sc=0.35+t*1.0;
-        ctx.save();ctx.translate(W/2,baseY);ctx.scale(sc,sc);
-        if(S.stroke){ctx.strokeStyle=S.strokeColor;ctx.lineWidth=S.strokeWidth*2;ctx.strokeText(line,-lw/2,0);}
-        ctx.fillStyle=h2r(S.color,S.opacity);ctx.fillText(line,-lw/2,0);
-        ctx.restore();
-        break;
-      }
-
-      case 'circle':{
-        if(li>0)break;
-        const txt=lines.join(' ');const ch2=[...txt];const tot2=ch2.length;
-        const r2=Math.min(W,H)/2-pad-S.size*.7;
-        ch2.forEach((ch,ci)=>{
-          const ang=(ci/tot2)*Math.PI*2-Math.PI/2;
-          ctx.save();
-          ctx.translate(W/2+Math.cos(ang)*r2,H/2+Math.sin(ang)*r2);
-          ctx.rotate(ang+Math.PI/2);
-          drawCh(ch,0,0);ctx.restore();
-        });
-        break;
-      }
-    }
-  });
-  clrSh();
-  positionHandles();
-}
-
-// ══════════════════════════════════════
-//  RESIZE HANDLES
-// ══════════════════════════════════════
-function positionHandles(){
-  const wrap=document.getElementById('cwrap');
-  const outer=wrap.parentElement;
-  const W=cv.offsetWidth,H=cv.offsetHeight;
-  outer.style.width=W+'px';
-  outer.style.height=H+'px';
-  document.getElementById('handles').style.width=W+'px';
-  document.getElementById('handles').style.height=H+'px';
-}
-
-let dragHandle=null,dragStart={x:0,y:0,w:0,h:0};
-document.querySelectorAll('.handle').forEach(h=>{
-  h.addEventListener('mousedown',e=>{
-    e.preventDefault();
-    dragHandle=h.dataset.handle;
-    dragStart={x:e.clientX,y:e.clientY,w:cv.width,h:cv.height};
-    window.addEventListener('mousemove',onDrag);
-    window.addEventListener('mouseup',stopDrag);
-  });
-  h.addEventListener('touchstart',e=>{
-    e.preventDefault();
-    dragHandle=h.dataset.handle;
-    const t=e.touches[0];
-    dragStart={x:t.clientX,y:t.clientY,w:cv.width,h:cv.height};
-    window.addEventListener('touchmove',onDragTouch,{passive:false});
-    window.addEventListener('touchend',stopDrag);
-  },{passive:false});
-});
-
-function onDrag(e){doDrag(e.clientX,e.clientY);}
-function onDragTouch(e){e.preventDefault();doDrag(e.touches[0].clientX,e.touches[0].clientY);}
-
-function doDrag(mx,my){
-  if(!dragHandle)return;
-  const dx=mx-dragStart.x,dy=my-dragStart.y;
-  let newW=dragStart.w,newH=dragStart.h;
-  if(dragHandle==='br'||dragHandle==='tr'||dragHandle==='tc'){ newW=Math.max(200,dragStart.w+dx*2); }
-  if(dragHandle==='bl'||dragHandle==='tl'){ newW=Math.max(200,dragStart.w-dx*2); }
-  if(dragHandle==='br'||dragHandle==='bl'||dragHandle==='bc'){ newH=Math.max(100,dragStart.h+dy*2); }
-  if(dragHandle==='tr'||dragHandle==='tl'){ newH=Math.max(100,dragStart.h-dy*2); }
-  S.userW=Math.round(newW);S.userH=Math.round(newH);
-  render();
-}
-function stopDrag(){
-  dragHandle=null;
-  window.removeEventListener('mousemove',onDrag);
-  window.removeEventListener('mouseup',stopDrag);
-  window.removeEventListener('touchmove',onDragTouch);
-  window.removeEventListener('touchend',stopDrag);
-}
-
-// ══════════════════════════════════════
-//  ANIMATIONS
-// ══════════════════════════════════════
-const ANIM_CSS=`<style>
-@keyframes wave{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-16px) scale(1.2)}}
-@keyframes pop{0%,100%{transform:scale(1)}30%{transform:scale(1.6) rotate(-12deg)}65%{transform:scale(.85) rotate(6deg)}}
-@keyframes zoom{0%,100%{transform:scale(1)}50%{transform:scale(1.35)}}
-@keyframes slidein{0%{opacity:0;transform:translateX(-60px)}70%{opacity:1;transform:translateX(4px)}100%{transform:translateX(0)}}
-@keyframes shake{0%,100%{transform:translate(0,0)}20%{transform:translate(-8px,2px) rotate(-4deg)}40%{transform:translate(8px,-2px) rotate(4deg)}60%{transform:translate(-5px,1px)}80%{transform:translate(5px,-1px)}}
-@keyframes typein{0%{opacity:0;transform:scale(.2) translateY(20px)}80%{transform:scale(1.1)}100%{opacity:1;transform:scale(1) translateY(0)}}
-@keyframes bounce{0%,100%{transform:translateY(0)}40%{transform:translateY(-22px) scaleY(1.1)}70%{transform:translateY(-8px)}}
-@keyframes spin{0%{transform:rotateY(0)}100%{transform:rotateY(360deg)}}
-@keyframes flip{0%,100%{transform:scaleX(1)}45%,55%{transform:scaleX(0)}}
-@keyframes blurglow{0%,100%{filter:blur(0) brightness(1)}50%{filter:blur(3px) brightness(1.5)}}
-.ac{display:inline-block;}
-</style>`;
-function charCss(anim,idx,total){
-  const d=`${(idx*.07).toFixed(2)}s`;
-  switch(anim){
-    case 'wave':return `animation:wave 1.3s ease-in-out ${d} infinite`;
-    case 'pop':return `animation:pop 1.6s ease ${d} infinite`;
-    case 'zoom':return `animation:zoom 1.4s ease-in-out ${d} infinite`;
-    case 'slide':return `animation:slidein .65s cubic-bezier(.25,1,.5,1) ${d} both`;
-    case 'rainbow':return `animation:wave 2s ease-in-out ${d} infinite;color:hsl(${Math.round((idx/Math.max(total,1))*360)},100%,65%)`;
-    case 'shake':return `animation:shake .55s ease ${d} infinite`;
-    case 'bounce':return `animation:bounce 1s ease ${d} infinite`;
-    case 'spin':return `animation:spin 2.2s linear ${d} infinite`;
-    case 'flip':return `animation:flip 2s ease-in-out ${d} infinite`;
-    case 'blur':return `animation:blurglow 1.6s ease-in-out ${d} infinite`;
-    case 'typewriter':return `animation:typein .2s ease ${(idx*(S.twSpeed/1000)).toFixed(2)}s both;opacity:0;animation-fill-mode:forwards`;
-    default:return '';
-  }
-}
-function renderAnim(lines){
-  const ad=document.getElementById('animDiv');
-  document.getElementById('cv').style.display='none';
-  ad.style.display='flex';
-  const fs=Math.min(S.size,110);
-  const fontCS=fnt(fs,S.weight,S.italic,curFont);
-  const shCS=S.shadow?`text-shadow:${S.shadowX}px ${S.shadowY}px ${S.shadowBlur}px ${S.shadowColor}`:'';
-  const stCS=S.stroke?`-webkit-text-stroke:${S.strokeWidth}px ${S.strokeColor}`:'';
-  const colCS=S.anim==='rainbow'?'':(`color:${S.color}`);
-  const alCS=S.rtl?(S.align==='center'?'center':S.align==='left'?'left':'right'):(S.align==='center'?'center':S.align==='right'?'right':'left');
-  const total=[...lines.join('')].length;
-  let ci=0;
-  let html=ANIM_CSS+`<div style="text-align:${alCS};direction:${S.rtl?'rtl':'ltr'};opacity:${S.opacity}">`;
-  lines.forEach(line=>{
-    html+=`<div style="font:${fontCS};${shCS};${stCS};${colCS};line-height:${S.lh}">`;
-    [...line].forEach(ch=>{
-      const css=charCss(S.anim,ci++,total);
-      html+=`<span class="ac" style="${css}">${ch===' '?'&nbsp;':ch.replace(/</g,'&lt;')}</span>`;
-    });
-    html+='</div>';
-  });
-  html+='</div>';
-  ad.innerHTML=html;
-  ad.style.minHeight=`${Math.min(fs*2,300)}px`;
-}
-function stopAnim(){
-  document.getElementById('animDiv').style.display='none';
-  document.getElementById('animDiv').innerHTML='';
-  document.getElementById('cv').style.display='block';
-}
-function render(){
-  const lines=getLines();
-  renderStatic(lines);
-  if(S.anim!=='none')renderAnim(lines);else stopAnim();
-  if(bgImg)compUpdate();
-}
-
-// ══════════════════════════════════════
-//  GIF — pure canvas, NO workers needed
-// ══════════════════════════════════════
-async function buildGIF(status){
-  const lines=getLines();
-  const FRAMES=16,DELAY=100;
-  const tmp=document.createElement('canvas');
-  const tc=tmp.getContext('2d');
-  tc.font=fnt(S.size,S.weight,S.italic,curFont);tc.direction='ltr';tc.textBaseline='alphabetic';tc.textAlign='left';
-  const lws=lines.map(l=>tc.measureText(l).width);
-  const maxW=Math.max(10,...lws);
-  const lh=S.size*S.lh,pad=S.pad,sw2=S.stroke?S.strokeWidth*2:0;
-  const W=Math.max(400,Math.ceil(maxW+pad*2+sw2*2+40));
-  const H=Math.max(200,Math.ceil(lines.length*lh+pad*2+sw2*2+20));
-  tmp.width=W;tmp.height=H;
-
-  const frames=[];
-  for(let f=0;f<FRAMES;f++){
-    const t=f/FRAMES;
-    tc.clearRect(0,0,W,H);
-    tc.fillStyle='#ffffff';tc.fillRect(0,0,W,H);
-    tc.font=fnt(S.size,S.weight,S.italic,curFont);tc.direction='ltr';tc.textBaseline='alphabetic';tc.textAlign='left';
-
-    const allC=[...lines.join('')];const total=allC.length;let ci=0;
-    lines.forEach((line,li)=>{
-      const lw=lws[li];
-      // RTL x calculation
-      let startX;
-      if(S.rtl){startX=S.align==='right'?W-pad-sw2-lw:S.align==='center'?(W-lw)/2:pad+sw2;}
-      else{startX=S.align==='left'?pad+sw2:S.align==='center'?(W-lw)/2:W-pad-sw2-lw;}
-      const y=pad+sw2+(li+1)*lh;
-      [...line].forEach((ch,chi)=>{
-        const phase=((t+ci/Math.max(total,1))%1)*Math.PI*2;
-        let oy=0,ox=0,sc=1,vis=true;
-        switch(S.anim){
-          case 'wave':oy=Math.sin(phase)*S.size*.2;break;
-          case 'pop':sc=1+Math.sin(phase)*.3;break;
-          case 'zoom':sc=1+Math.sin(phase)*.18;break;
-          case 'shake':ox=Math.sin(phase)*6;oy=Math.cos(phase)*2;break;
-          case 'bounce':oy=Math.abs(Math.sin(phase))*(-S.size*.25);break;
-          case 'typewriter':vis=ci<Math.round(t*total*1.2);break;
-        }
-        if(!vis){ci++;return;}
-        const prevW=tc.measureText(line.slice(0,chi)).width;
-        const cw=tc.measureText(ch).width;
-        const cx2=startX+prevW+cw/2;
-        tc.save();tc.translate(cx2+ox,y+oy);if(sc!==1)tc.scale(sc,sc);
-        if(S.shadow){tc.shadowColor=S.shadowColor;tc.shadowBlur=S.shadowBlur;tc.shadowOffsetX=S.shadowX;tc.shadowOffsetY=S.shadowY;}
-        if(S.stroke){tc.strokeStyle=S.strokeColor;tc.lineWidth=S.strokeWidth*2;tc.lineJoin='round';tc.strokeText(ch,-cw/2,0);}
-        if(S.anim==='rainbow')tc.fillStyle=`hsl(${(ci/total*360+t*360)%360},100%,50%)`;
-        else tc.fillStyle=h2r(S.color,S.opacity);
-        tc.fillText(ch,-cw/2,0);tc.restore();ci++;
-      });
-    });
-    frames.push(tmp.toDataURL('image/png'));
-    if(status)status.textContent=`⏳ ${Math.round((f/FRAMES)*70)}%`;
-    await new Promise(r=>setTimeout(r,0));
-  }
-
-  // Try GIF.js
-  if(typeof GIF==='undefined'){
-    if(status)status.textContent='⏳ טוען מנוע GIF…';
-    await new Promise(res=>{
-      const s=document.createElement('script');
-      s.src='https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.js';
-      s.onload=res;s.onerror=res;document.head.appendChild(s);
-    });
-  }
-
-  // Load all frame images first
-  if(status)status.textContent='⏳ 75%';
-  const imgs=await Promise.all(frames.map(src=>new Promise(res=>{
-    const i=new Image();i.onload=()=>res(i);i.onerror=()=>res(i);i.src=src;
-  })));
-
-  if(typeof GIF==='undefined'){
-    if(status)status.textContent='⚠ GIF לא זמין — מציג PNG';
-    return{url:frames[0],ext:'png'};
-  }
-
-  if(status)status.textContent='⏳ 80% — מרכיב GIF…';
-  return new Promise(res=>{
-    const gif=new GIF({
-      workers:2,quality:10,width:W,height:H,
-      workerScript:'https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.worker.js'
-    });
-    imgs.forEach(img=>gif.addFrame(img,{delay:DELAY}));
-    gif.on('finished',blob=>{
-      if(status)status.textContent='✓ מוכן!';
-      setTimeout(()=>{if(status)status.textContent='';},3000);
-      res({url:URL.createObjectURL(blob),ext:'gif'});
-    });
-    gif.on('error',()=>{
-      if(status)status.textContent='⚠ שגיאה — PNG';
-      res({url:frames[0],ext:'png'});
-    });
-    gif.render();
-    // Progress
-    gif.on('progress',p=>{if(status)status.textContent=`⏳ ${80+Math.round(p*20)}%`;});
-  });
-}
-
-// ══════════════════════════════════════
-//  PREVIEW
-// ══════════════════════════════════════
-let pendingUrl=null,pendingName='sticker.png';
-function showPNGPreview(){
-  const url=cv.toDataURL('image/png');
-  pendingUrl=url;pendingName='sticker.png';
-  document.getElementById('previewModalImg').src=url;
-  document.getElementById('previewModalImg').style.display='block';
-  document.getElementById('previewGif').style.display='none';
-  document.getElementById('previewModal').classList.add('show');
-}
-async function showGIFPreview(){
-  const status=document.getElementById('gifStatus');
-  status.textContent='⏳ מתחיל…';
-  const result=await buildGIF(status);
-  if(!result)return;
-  pendingUrl=result.url;pendingName=`sticker.${result.ext}`;
-  if(result.ext==='gif'){
-    document.getElementById('previewGif').src=result.url;
-    document.getElementById('previewGif').style.display='block';
-    document.getElementById('previewModalImg').style.display='none';
-  } else {
-    document.getElementById('previewModalImg').src=result.url;
-    document.getElementById('previewModalImg').style.display='block';
-    document.getElementById('previewGif').style.display='none';
-  }
-  document.getElementById('previewModal').classList.add('show');
-}
-function closePreview(){document.getElementById('previewModal').classList.remove('show');}
-document.getElementById('previewModal').addEventListener('click',e=>{if(e.target===document.getElementById('previewModal'))closePreview();});
-function modalDownload(){const a=document.createElement('a');a.href=pendingUrl;a.download=pendingName;a.click();}
-
-// ══════════════════════════════════════
-//  COMPOSITE
-// ══════════════════════════════════════
-function loadBg(input){
-  const file=input.files[0];if(!file)return;
-  const img=new Image();
-  img.onload=()=>{bgImg=img;document.getElementById('pg').style.display='grid';document.getElementById('cctrl').style.display='flex';compUpdate();};
-  img.src=URL.createObjectURL(file);
-}
-function compUpdate(){
-  if(!bgImg)return;
-  const cc=document.getElementById('cc');cc.style.display='block';
-  const cctx=cc.getContext('2d');
-  const sc=Math.min(1,640/bgImg.width);
-  cc.width=bgImg.width*sc;cc.height=bgImg.height*sc;
-  cctx.drawImage(bgImg,0,0,cc.width,cc.height);
-  const px=+document.getElementById('px').value/100;
-  const py=+document.getElementById('py').value/100;
-  const psc=+document.getElementById('psc').value/100;
-  const rot=+document.getElementById('pro').value*Math.PI/180;
-  const sw=cv.width*psc*sc,sh=cv.height*psc*sc;
-  cctx.save();cctx.translate(cc.width*px,cc.height*py);cctx.rotate(rot);
-  cctx.drawImage(cv,-sw/2,-sh/2,sw,sh);cctx.restore();
-}
-function dlComp(){const cc=document.getElementById('cc');const a=document.createElement('a');a.href=cc.toDataURL('image/png');a.download='sticker-photo.png';a.click();}
-async function copyClip(){try{cv.toBlob(async b=>{await navigator.clipboard.write([new ClipboardItem({'image/png':b})]);alert('✓ הועתק!');});}catch{alert('השתמש בתצוגה מקדימה');}}
-
-// ══════════════════════════════════════
-//  PRESETS
-// ══════════════════════════════════════
-function preset(n){
-  const P={
-    neon:{color:'#00ffcc',shadow:true,shadowColor:'#00ffcc',shadowBlur:28,shadowX:0,shadowY:0,stroke:false},
-    gold:{color:'#f5c842',stroke:true,strokeColor:'#7a5500',strokeWidth:3,shadow:true,shadowColor:'#000',shadowBlur:10,shadowX:4,shadowY:4},
-    outline:{color:'#ffffff',stroke:true,strokeColor:'#000000',strokeWidth:7,shadow:false},
-    fire:{color:'#ff4400',stroke:true,strokeColor:'#ffaa00',strokeWidth:5,shadow:true,shadowColor:'#ff0000',shadowBlur:22,shadowX:0,shadowY:0},
-    '3d':{color:'#ffffff',shadow:true,shadowColor:'#0033cc',shadowBlur:0,shadowX:7,shadowY:7,stroke:true,strokeColor:'#000088',strokeWidth:2},
-    clean:{color:'#ffffff',stroke:false,shadow:false},
-  };
-  const p=P[n];if(!p)return;Object.assign(S,p);
-  document.getElementById('tc').value=S.color;
-  document.getElementById('stEn').checked=!!S.stroke;document.getElementById('stC').style.display=S.stroke?'flex':'none';
-  if(S.strokeColor)document.getElementById('stCol').value=S.strokeColor;
-  document.getElementById('stW').value=S.strokeWidth||4;document.getElementById('stWv').textContent=S.strokeWidth||4;
-  document.getElementById('shEn').checked=!!S.shadow;document.getElementById('shC').style.display=S.shadow?'flex':'none';
-  if(S.shadowColor&&!S.shadowColor.startsWith('rgba'))document.getElementById('shCol').value=S.shadowColor;
-  document.getElementById('shB').value=S.shadowBlur||0;document.getElementById('shBv').textContent=S.shadowBlur||0;
-  document.getElementById('shX').value=S.shadowX||0;document.getElementById('shXv').textContent=S.shadowX||0;
-  document.getElementById('shY').value=S.shadowY||0;document.getElementById('shYv').textContent=S.shadowY||0;
-  render();
-}
-
-// ══════════════════════════════════════
-//  WIRING
-// ══════════════════════════════════════
-document.getElementById('txt').addEventListener('input',e=>{S.text=e.target.value;render();});
-document.getElementById('fw').addEventListener('change',e=>{S.weight=e.target.value;render();});
-function rng(id,key,dsp,tx){document.getElementById(id).addEventListener('input',e=>{const v=parseFloat(e.target.value);S[key]=tx?tx(v):v;if(dsp)document.getElementById(dsp).textContent=tx?tx(v).toFixed(2):v;render();});}
-rng('sz','size','szv');
-rng('op','opacity','opv',v=>{document.getElementById('opv').textContent=v+'%';return+(v/100).toFixed(2);});
-rng('lh','lh','lhv',v=>+(v/100).toFixed(2));
-rng('pd','pad','pdv');
-rng('stW','strokeWidth','stWv');
-rng('shB','shadowBlur','shBv');
-rng('shX','shadowX','shXv');
-rng('shY','shadowY','shYv');
-document.getElementById('tc').addEventListener('input',e=>{S.color=e.target.value;render();});
-document.getElementById('stCol').addEventListener('input',e=>{S.strokeColor=e.target.value;render();});
-document.getElementById('shCol').addEventListener('input',e=>{S.shadowColor=e.target.value;render();});
-document.getElementById('stEn').addEventListener('change',e=>{S.stroke=e.target.checked;document.getElementById('stC').style.display=S.stroke?'flex':'none';render();});
-document.getElementById('shEn').addEventListener('change',e=>{S.shadow=e.target.checked;document.getElementById('shC').style.display=S.shadow?'flex':'none';render();});
-const TM={tI:'italic',tU:'underline',tUP:'uppercase',tR:'rtl'};
-Object.entries(TM).forEach(([id,k])=>document.getElementById(id).addEventListener('click',function(){S[k]=!S[k];this.classList.toggle('active',S[k]);render();}));
-document.querySelectorAll('[data-align]').forEach(b=>b.addEventListener('click',function(){document.querySelectorAll('[data-align]').forEach(x=>x.classList.remove('active'));this.classList.add('active');S.align=this.dataset.align;render();}));
-document.querySelectorAll('[data-shape]').forEach(b=>b.addEventListener('click',function(){document.querySelectorAll('[data-shape]').forEach(x=>x.classList.remove('active'));this.classList.add('active');S.shape=this.dataset.shape;render();}));
-document.querySelectorAll('[data-minsize]').forEach(b=>b.addEventListener('click',function(){document.querySelectorAll('[data-minsize]').forEach(x=>x.classList.remove('active'));this.classList.add('active');S.minSize=+this.dataset.minsize;S.userW=null;S.userH=null;render();}));
-document.querySelectorAll('[data-anim]').forEach(b=>b.addEventListener('click',function(){
-  document.querySelectorAll('[data-anim]').forEach(x=>x.classList.remove('active'));
-  this.classList.add('active');S.anim=this.dataset.anim;
-  document.getElementById('gifBtn').style.display=S.anim==='none'?'none':'block';
-  document.getElementById('twSpeed').style.display=S.anim==='typewriter'?'block':'none';
-  render();
-}));
-
-// INIT
-buildTabs();buildGrid();
-document.fonts.ready.then(()=>{render();loadRepoFonts();});
-render();
-</script>
-</body>
-</html>
