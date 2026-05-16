@@ -1,96 +1,67 @@
-export default function GimlaTechLayout() {
+export default function GimlaTechPage() {
   return (
-    <div className="min-h-screen flex bg-gradient-to-b from-blue-50 to-white" dir="rtl">
+    <div className="min-h-screen flex bg-gradient-to-b from-cyan-50 to-blue-50" dir="rtl">
 
-      {/* Sidebar */}
-      <aside className="w-72 bg-white border-l border-blue-200 shadow-xl p-6 flex flex-col gap-6 fixed right-0 top-0 bottom-0">
+      {/* Right Sidebar */}
+      <aside className="w-72 bg-white border-l-4 border-cyan-300 shadow-xl p-6 flex flex-col gap-6 fixed right-0 top-0 bottom-0 rounded-l-3xl">
 
         {/* Logo + Title */}
         <div className="text-center">
           <img
             src="/logo.png"
             alt="לוגו גימלאטק"
-            className="w-28 h-28 mx-auto mb-3"
+            className="w-28 h-28 mx-auto mb-3 drop-shadow-md"
           />
-          <h2 className="text-xl font-bold text-blue-700">
-            גימלאטק לשירותכם
+          <h2 className="text-2xl font-extrabold text-cyan-700 drop-shadow-sm mb-2">
+            גימלאטק לשרותך בחינם
           </h2>
+
+          {/* Phone Number */}
+          <a
+            href="tel:0503960685"
+            className="text-lg font-semibold text-cyan-800 bg-cyan-100 hover:bg-cyan-200 py-2 px-4 rounded-xl inline-block shadow-sm transition"
+          >
+            ☎️ 050‑3960685
+          </a>
         </div>
 
         {/* Menu Buttons */}
-        <nav className="flex flex-col gap-3 text-lg font-medium">
-
-          <button className="bg-blue-100 hover:bg-blue-200 text-blue-800 py-3 rounded-xl transition">
-            קישורים
+        <nav className="flex flex-col gap-3 text-lg font-medium mt-4">
+          <button className="bg-cyan-100 hover:bg-cyan-200 text-cyan-800 py-3 rounded-2xl transition shadow-sm">
+            🔗 קישורים
           </button>
-
-          <button className="bg-blue-100 hover:bg-blue-200 text-blue-800 py-3 rounded-xl transition">
-            בקשת סיוע בוואטסאפ
+          <button className="bg-cyan-100 hover:bg-cyan-200 text-cyan-800 py-3 rounded-2xl transition shadow-sm">
+            💬 בקשת סיוע בוואטסאפ
           </button>
-
-          <button className="bg-blue-100 hover:bg-blue-200 text-blue-800 py-3 rounded-xl transition">
-            בקשת סיוע בטלפון
+          <button className="bg-cyan-100 hover:bg-cyan-200 text-cyan-800 py-3 rounded-2xl transition shadow-sm">
+            📞 בקשת סיוע בטלפון
           </button>
-
-          <button className="bg-blue-100 hover:bg-blue-200 text-blue-800 py-3 rounded-xl transition">
-            הצטרפות לקבוצת הטיפים
+          <button className="bg-cyan-100 hover:bg-cyan-200 text-cyan-800 py-3 rounded-2xl transition shadow-sm">
+            💡 הצטרפות לקבוצת הטיפים
           </button>
-
           <a
             href="https://www.facebook.com/share/1DFVqgGuin/"
             target="_blank"
-            className="bg-blue-100 hover:bg-blue-200 text-blue-800 py-3 rounded-xl transition text-center"
+            className="bg-cyan-100 hover:bg-cyan-200 text-cyan-800 py-3 rounded-2xl transition shadow-sm text-center"
           >
-            דף הפייסבוק שלנו
+            📘 דף הפייסבוק
           </a>
-
-          <button className="bg-blue-100 hover:bg-blue-200 text-blue-800 py-3 rounded-xl transition">
-            בקשה להצטרפות כמתנדב
+          <button className="bg-cyan-100 hover:bg-cyan-200 text-cyan-800 py-3 rounded-2xl transition shadow-sm">
+            🤝 בקשה להצטרפות כמתנדב
           </button>
-
-          <button className="bg-blue-100 hover:bg-blue-200 text-blue-800 py-3 rounded-xl transition">
-            אודותנו
+          <button className="bg-cyan-100 hover:bg-cyan-200 text-cyan-800 py-3 rounded-2xl transition shadow-sm">
+            ℹ️ אודותנו
           </button>
-
         </nav>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 p-10 mr-72">
-
-        <h1 className="text-4xl font-bold text-blue-800 mb-10">
-          פעילות גימלאטק
-        </h1>
-
-        {/* Image + Speech Bubbles */}
-        <div className="relative bg-white rounded-3xl shadow-lg p-8 border border-blue-100">
-
-          {/* Speech bubble 1 */}
-          <div className="absolute right-10 top-6 bg-blue-600 text-white px-4 py-2 rounded-2xl shadow-lg">
-            אהה הבנתי!
-          </div>
-
-          {/* Speech bubble 2 */}
-          <div className="absolute left-10 bottom-6 bg-emerald-600 text-white px-4 py-2 rounded-2xl shadow-lg">
-            יש לך שאלות נוספות?
-          </div>
-
-          {/* Image */}
-          <img
-            src="/elderly-phone-chat.jpg"
-            alt="שני בני הגיל השלישי משוחחים בטלפון"
-            className="w-full rounded-2xl"
-          />
-        </div>
-
-        {/* Text Below */}
-        <div className="mt-10 bg-white rounded-3xl shadow-lg p-8 border border-blue-100 text-lg leading-relaxed text-slate-700 space-y-4">
-          <p>✔ סיוע בהתמודדות עם השירותים הממשלתיים</p>
-          <p>✔ עזרה בטיפול במחשב, בטלפון ובציוד היקפי</p>
-          <p>✔ סיוע בהתמודדות עם אפליקציות שונות במחשב ובטלפון</p>
-          <p>✔ תמיכה בהתמודדות עם כלי בית אלקטרוניים</p>
-        </div>
-
+      <main className="flex-1 p-10 mr-72 flex items-center justify-center">
+        <img
+          src="/attachments/QMYtVRV4mHYePTH9ABPE9.jpeg"
+          alt="שני מבוגרים משוחחים בטלפון"
+          className="rounded-3xl shadow-2xl border-4 border-cyan-200 w-[80%] max-w-4xl"
+        />
       </main>
     </div>
   );
